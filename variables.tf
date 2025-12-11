@@ -1,5 +1,5 @@
 # variables.tf
-# Input variables for Azure Hub-Spoke Network configuration
+# Root-level input variables for Hub-Spoke Network Topology
 
 # ============================================================================
 # General Configuration
@@ -12,90 +12,127 @@ variable "environment" {
 
   validation {
     condition     = contains(["prod", "staging", "dev"], var.environment)
-    error_message = "Environment must be 'prod', 'staging', or 'dev'"
+    error_message = "Environment must be prod, staging, or dev."
   }
 }
 
 variable "location" {
   type        = string
-  description = "Azure region for resources"
+  description = "Azure region for all resources"
   default     = "westeurope"
-}
-
-variable "availability_zones" {
-  type        = list(string)
-  description = "Availability zones for high availability (e.g., ['1', '2', '3'])"
-  default     = ["1", "2", "3"]
 }
 
 variable "tags" {
   type        = map(string)
-  description = "Common tags to apply to all resources"
+  description = "Common tags for all resources"
   default = {
     Project     = "HubSpokeNetwork"
     ManagedBy   = "Terraform"
-    Owner       = "NetworkTeam"
-    CostCenter  = "IT-Network"
+    Owner       = "Platform Team"
   }
 }
 
 # ============================================================================
-# Network Address Spaces
+# Network Configuration
 # ============================================================================
 
 variable "hub_address_space" {
   type        = string
-  description = "Address space for Hub VNet"
+  description = "Address space for hub VNet"
   default     = "10.0.0.0/16"
 }
 
 variable "staging_address_space" {
   type        = string
-  description = "Address space for Staging Spoke VNet"
+  description = "Address space for staging spoke VNet"
   default     = "10.1.0.0/16"
 }
 
 variable "production_address_space" {
   type        = string
-  description = "Address space for Production Spoke VNet"
+  description = "Address space for production spoke VNet"
   default     = "10.2.0.0/16"
 }
 
 # ============================================================================
-# Resource Protection
-# ============================================================================
-
-variable "enable_resource_lock" {
-  type        = bool
-  description = "Enable resource lock on production resources to prevent accidental deletion"
-  default     = false
-}
-
-# ============================================================================
-# Feature Flags - Hub Resources
+# Hub Feature Flags
 # ============================================================================
 
 variable "deploy_firewall" {
   type        = bool
-  description = "Deploy Azure Firewall in hub (recommended for production)"
+  description = "Deploy Azure Firewall in hub"
   default     = true
 }
 
 variable "deploy_bastion" {
   type        = bool
-  description = "Deploy Azure Bastion for secure VM access (recommended)"
+  description = "Deploy Azure Bastion in hub"
   default     = true
 }
 
-variable "deploy_vpn_gateway" {
+variable "deploy_gateway" {
   type        = bool
-  description = "Deploy VPN Gateway for hybrid connectivity (optional)"
+  description = "Deploy VPN/ExpressRoute gateway subnet in hub"
   default     = false
 }
 
 variable "deploy_management_subnet" {
   type        = bool
-  description = "Deploy management subnet for jump boxes and tools (optional)"
+  description = "Deploy management subnet in hub"
+  default     = true
+}
+
+# ============================================================================
+# Spoke Deployment Flags
+# ============================================================================
+
+variable "deploy_staging_spoke" {
+  type        = bool
+  description = "Deploy staging spoke VNet"
+  default     = true
+}
+
+variable "deploy_production_spoke" {
+  type        = bool
+  description = "Deploy production spoke VNet"
+  default     = true
+}
+
+# Staging Spoke Subnets
+variable "deploy_staging_workload_subnet" {
+  type        = bool
+  description = "Deploy workload subnet in staging spoke"
+  default     = true
+}
+
+variable "deploy_staging_data_subnet" {
+  type        = bool
+  description = "Deploy data subnet in staging spoke"
+  default     = true
+}
+
+variable "deploy_staging_app_subnet" {
+  type        = bool
+  description = "Deploy application subnet in staging spoke"
+  default     = true
+}
+
+# Production Spoke Subnets
+variable "deploy_production_workload_subnet" {
+  type        = bool
+  description = "Deploy workload subnet in production spoke"
+  default     = true
+}
+
+variable "deploy_production_data_subnet" {
+  type        = bool
+  description = "Deploy data subnet in production spoke"
+  default     = true
+}
+
+variable "deploy_production_app_subnet" {
+  type        = bool
+  description = "Deploy application subnet in production spoke"
   default     = true
 }
 
@@ -110,24 +147,24 @@ variable "firewall_sku_tier" {
 
   validation {
     condition     = contains(["Standard", "Premium"], var.firewall_sku_tier)
-    error_message = "Firewall SKU tier must be 'Standard' or 'Premium'"
+    error_message = "Firewall SKU tier must be Standard or Premium."
   }
 }
 
 variable "firewall_threat_intel_mode" {
   type        = string
-  description = "Threat Intelligence mode (Off, Alert, or Deny)"
+  description = "Threat intelligence mode (Alert, Deny, Off)"
   default     = "Alert"
 
   validation {
-    condition     = contains(["Off", "Alert", "Deny"], var.firewall_threat_intel_mode)
-    error_message = "Threat Intel mode must be 'Off', 'Alert', or 'Deny'"
+    condition     = contains(["Alert", "Deny", "Off"], var.firewall_threat_intel_mode)
+    error_message = "Threat intel mode must be Alert, Deny, or Off."
   }
 }
 
 variable "firewall_dns_servers" {
   type        = list(string)
-  description = "Custom DNS servers for firewall (empty = use Azure DNS)"
+  description = "Custom DNS servers for Azure Firewall"
   default     = []
 }
 
@@ -142,52 +179,72 @@ variable "bastion_sku" {
 
   validation {
     condition     = contains(["Basic", "Standard"], var.bastion_sku)
-    error_message = "Bastion SKU must be 'Basic' or 'Standard'"
+    error_message = "Bastion SKU must be Basic or Standard."
   }
 }
 
 variable "bastion_scale_units" {
   type        = number
-  description = "Number of scale units for Bastion (2-50, Standard SKU only)"
+  description = "Number of scale units for Azure Bastion (2-50, Standard SKU only)"
   default     = 2
 
   validation {
     condition     = var.bastion_scale_units >= 2 && var.bastion_scale_units <= 50
-    error_message = "Bastion scale units must be between 2 and 50"
+    error_message = "Bastion scale units must be between 2 and 50."
   }
 }
 
 variable "bastion_copy_paste_enabled" {
   type        = bool
-  description = "Enable copy/paste for Bastion sessions"
+  description = "Enable copy/paste for Azure Bastion"
   default     = true
 }
 
 variable "bastion_file_copy_enabled" {
   type        = bool
-  description = "Enable file copy for Bastion (Standard SKU only)"
-  default     = false
+  description = "Enable file copy for Azure Bastion (Standard SKU only)"
+  default     = true
 }
 
 variable "bastion_ip_connect_enabled" {
   type        = bool
-  description = "Enable IP-based connection for Bastion (Standard SKU only)"
+  description = "Enable IP-based connection for Azure Bastion (Standard SKU only)"
   default     = false
 }
 
 variable "bastion_tunneling_enabled" {
   type        = bool
-  description = "Enable tunneling for Bastion (Standard SKU only)"
+  description = "Enable tunneling for Azure Bastion (Standard SKU only)"
   default     = false
 }
 
 # ============================================================================
-# Monitoring and Logging
+# High Availability
+# ============================================================================
+
+variable "availability_zones" {
+  type        = list(string)
+  description = "Availability zones for zone-redundant resources"
+  default     = ["1", "2", "3"]
+}
+
+# ============================================================================
+# Route Table Configuration
+# ============================================================================
+
+variable "enable_forced_tunneling" {
+  type        = bool
+  description = "Enable forced tunneling through hub firewall for spoke VNets"
+  default     = true
+}
+
+# ============================================================================
+# Monitoring and Diagnostics
 # ============================================================================
 
 variable "enable_diagnostics" {
   type        = bool
-  description = "Enable diagnostic settings (logs and metrics)"
+  description = "Enable diagnostic settings for all resources"
   default     = true
 }
 
@@ -205,22 +262,54 @@ variable "enable_traffic_analytics" {
 
 variable "traffic_analytics_interval" {
   type        = number
-  description = "Traffic Analytics processing interval in minutes (10 or 60)"
-  default     = 60
+  description = "Traffic Analytics processing interval in minutes"
+  default     = 10
 
   validation {
     condition     = contains([10, 60], var.traffic_analytics_interval)
-    error_message = "Traffic Analytics interval must be 10 or 60 minutes"
+    error_message = "Traffic Analytics interval must be 10 or 60 minutes."
   }
 }
 
-variable "log_retention_days" {
-  type        = number
-  description = "Number of days to retain logs (0 = indefinite)"
-  default     = 90
+variable "log_analytics_sku" {
+  type        = string
+  description = "Log Analytics workspace SKU"
+  default     = "PerGB2018"
 
   validation {
-    condition     = var.log_retention_days >= 0 && var.log_retention_days <= 365
-    error_message = "Log retention days must be between 0 and 365"
+    condition     = contains(["Free", "PerNode", "PerGB2018", "Standalone", "Standard", "Premium"], var.log_analytics_sku)
+    error_message = "Invalid Log Analytics SKU."
   }
+}
+
+variable "log_analytics_retention_days" {
+  type        = number
+  description = "Log Analytics workspace retention in days"
+  default     = 30
+
+  validation {
+    condition     = var.log_analytics_retention_days >= 30 && var.log_analytics_retention_days <= 730
+    error_message = "Retention must be between 30 and 730 days."
+  }
+}
+
+variable "storage_replication_type" {
+  type        = string
+  description = "Storage account replication type for flow logs"
+  default     = "LRS"
+
+  validation {
+    condition     = contains(["LRS", "GRS", "RAGRS", "ZRS", "GZRS", "RAGZRS"], var.storage_replication_type)
+    error_message = "Invalid storage replication type."
+  }
+}
+
+# ============================================================================
+# Resource Lock Configuration
+# ============================================================================
+
+variable "enable_resource_lock" {
+  type        = bool
+  description = "Enable resource locks on production resources"
+  default     = true
 }
