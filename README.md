@@ -198,16 +198,52 @@ azure-hub-spoke-networking-terraform/
 ├── provider.tf                    # Terraform and Azure provider configuration
 ├── variables.tf                   # Root variables (CIDR blocks, regions, etc.)
 ├── main.tf                        # Main orchestration (hub, spokes, peering)
+├── monitoring.tf                  # Shared monitoring (Log Analytics, Storage)
 ├── outputs.tf                     # Network outputs (IDs, names, etc.)
 ├── terraform.tfvars.example       # Example variable values
 ├── README.md                      # This file
 ├── .gitignore                     # Git ignore rules
+│
+├── hub/                           # ⭐ Hub VNet configuration
+│   ├── locals.tf                  # CIDR calculations and feature flags
+│   ├── variables.tf               # Hub-specific input variables
+│   ├── 01-foundation.tf           # Resource group
+│   ├── 02-networking.tf           # VNet and subnets
+│   ├── 03-firewall.tf             # Azure Firewall
+│   ├── 04-bastion.tf              # Azure Bastion
+│   ├── 05-nsg.tf                  # Network Security Groups
+│   └── 99-outputs.tf              # Hub outputs
+│
+├── spoke-staging/                 # ⭐ Staging Spoke configuration
+│   ├── locals.tf                  # CIDR calculations
+│   ├── variables.tf               # Staging-specific variables
+│   ├── 01-foundation.tf           # Resource group
+│   ├── 02-networking.tf           # VNet and subnets
+│   ├── 03-nsg.tf                  # Network Security Groups
+│   ├── 04-route-table.tf          # Route tables (forced tunneling)
+│   ├── 05-peering.tf              # VNet peering to hub
+│   └── 99-outputs.tf              # Staging outputs
+│
+├── spoke-production/              # ⭐ Production Spoke configuration
+│   ├── locals.tf                  # CIDR calculations
+│   ├── variables.tf               # Production-specific variables
+│   ├── 01-foundation.tf           # Resource group
+│   ├── 02-networking.tf           # VNet and subnets
+│   ├── 03-nsg.tf                  # Network Security Groups
+│   ├── 04-route-table.tf          # Route tables (forced tunneling)
+│   ├── 05-peering.tf              # VNet peering to hub
+│   └── 99-outputs.tf              # Production outputs
 │
 └── modules/                       # Reusable Terraform modules
     ├── naming/                    # ⭐ Naming convention module
     │   ├── main.tf                # Naming logic and tag generation
     │   ├── variables.tf           # Naming variables
     │   └── outputs.tf             # Name and tag outputs
+    │
+    ├── resource-group/            # ⭐ Resource Group module
+    │   ├── main.tf                # Resource group with locks
+    │   ├── variables.tf           # RG variables
+    │   └── outputs.tf             # RG outputs
     │
     ├── vnet/                      # ⭐ Generic VNet module
     │   ├── main.tf                # Virtual network resource
@@ -220,17 +256,17 @@ azure-hub-spoke-networking-terraform/
     │   └── outputs.tf             # Subnet outputs
     │
     ├── nsg/                       # ⭐ Network Security Group module
-    │   ├── main.tf                # NSG with flexible rules
+    │   ├── main.tf                # NSG with flow logs & Traffic Analytics
     │   ├── variables.tf           # NSG and rule variables
     │   └── outputs.tf             # NSG outputs
     │
     ├── firewall/                  # ⭐ Azure Firewall module
-    │   ├── main.tf                # Firewall, public IP, policies
+    │   ├── main.tf                # Firewall (Standard/Premium SKU)
     │   ├── variables.tf           # Firewall configuration
     │   └── outputs.tf             # Firewall outputs
     │
     ├── bastion/                   # ⭐ Azure Bastion module
-    │   ├── main.tf                # Bastion host and public IP
+    │   ├── main.tf                # Bastion host (Basic/Standard SKU)
     │   ├── variables.tf           # Bastion configuration
     │   └── outputs.tf             # Bastion outputs
     │
