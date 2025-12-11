@@ -53,7 +53,7 @@ variable "deploy_bastion" {
   default     = true
 }
 
-variable "deploy_vpn_gateway" {
+variable "deploy_gateway" {
   type        = bool
   description = "Deploy VPN Gateway subnet (future use)"
   default     = false

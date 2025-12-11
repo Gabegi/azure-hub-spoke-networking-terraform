@@ -14,7 +14,7 @@ locals {
   # Feature toggles
   deploy_firewall = var.deploy_firewall
   deploy_bastion  = var.deploy_bastion
-  deploy_gateway  = var.deploy_vpn_gateway
+  deploy_gateway  = var.deploy_gateway
   deploy_mgmt     = var.deploy_management_subnet
 
   # Monitoring

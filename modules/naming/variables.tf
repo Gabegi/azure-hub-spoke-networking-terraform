@@ -10,10 +10,12 @@ variable "resource_type" {
       "snet",    # Subnet
       "nsg",     # Network Security Group
       "afw",     # Azure Firewall
+      "afwp",    # Azure Firewall Policy
       "bas",     # Bastion
       "route",   # Route Table
       "pip",     # Public IP
       "log",     # Log Analytics
+      "st",      # Storage Account
       "rg",      # Resource Group
       "peer"     # VNet Peering
     ], var.resource_type)

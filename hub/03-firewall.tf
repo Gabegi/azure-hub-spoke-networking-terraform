@@ -27,6 +27,17 @@ module "firewall_pip_naming" {
   common_tags   = var.tags
 }
 
+module "firewall_policy_naming" {
+  source = "../modules/naming"
+
+  resource_type = "afwp"
+  workload      = "hub"
+  environment   = var.environment
+  location      = var.location
+  instance      = "001"
+  common_tags   = var.tags
+}
+
 # ============================================================================
 # Azure Firewall
 # ============================================================================
@@ -47,7 +58,7 @@ module "firewall" {
 
   # Firewall Policy
   create_firewall_policy = true
-  firewall_policy_name   = "afwp-${module.firewall_naming.name}"
+  firewall_policy_name   = module.firewall_policy_naming.name
 
   # Threat Intelligence
   threat_intel_mode = var.firewall_threat_intel_mode
