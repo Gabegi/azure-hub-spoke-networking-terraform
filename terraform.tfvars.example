@@ -1,6 +1,14 @@
 # terraform.tfvars.example
-# Example variable values for Hub-Spoke Network Topology
-# Copy this file to terraform.tfvars and customize for your environment
+# Generic example variable values for Hub-Spoke Network Topology
+#
+# RECOMMENDED: Use environment-specific tfvars files instead:
+# - prod.tfvars.example    -> Copy to prod.tfvars
+# - dev.tfvars.example     -> Copy to dev.tfvars
+# - staging.tfvars.example -> Copy to staging.tfvars
+#
+# Then deploy with: terraform apply -var-file="<environment>.tfvars"
+#
+# Alternatively, copy this file to terraform.tfvars for a generic setup
 
 # ============================================================================
 # General Configuration
@@ -60,34 +68,16 @@ firewall_threat_intel_mode = "Alert"     # "Alert", "Deny", or "Off"
 firewall_dns_servers       = []          # Leave empty for Azure DNS
 
 # ============================================================================
-# Azure Bastion Configuration (Environment-Specific)
+# Azure Bastion Configuration
 # ============================================================================
 
-# Bastion config is automatically selected based on environment variable
-# Default configurations:
-#
-# Production (environment = "prod"):
-#   sku                = "Standard"
-#   scale_units        = 2
-#   copy_paste_enabled = true
-#   file_copy_enabled  = true
-#   ip_connect_enabled = true
-#   tunneling_enabled  = true
-#   zones              = ["1", "2", "3"]
-#
-# Dev/Staging (environment = "dev" or "staging"):
-#   sku                = "Basic"
-#   scale_units        = 2        # N/A for Basic
-#   copy_paste_enabled = true
-#   file_copy_enabled  = false    # Not available in Basic
-#   ip_connect_enabled = false    # Not available in Basic
-#   tunneling_enabled  = false    # Not available in Basic
-#   zones              = ["1"]
-
-# Optional: Override bastion settings (uncomment to use)
-# bastion_sku_override = "Standard"     # Override SKU regardless of environment
-# bastion_scale_units_override = 3      # Override scale units
-# bastion_zones_override = ["1", "2"]   # Override availability zones
+bastion_sku                = "Standard"  # or "Basic"
+bastion_scale_units        = 2           # 2-50 for Standard SKU
+bastion_copy_paste_enabled = true
+bastion_file_copy_enabled  = true        # Standard SKU only
+bastion_ip_connect_enabled = true        # Standard SKU only
+bastion_tunneling_enabled  = true        # Standard SKU only
+bastion_zones              = ["1", "2", "3"]
 
 # ============================================================================
 # High Availability

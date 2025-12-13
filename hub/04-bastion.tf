@@ -52,7 +52,7 @@ module "bastion" {
   tunneling_enabled  = var.bastion_tunneling_enabled
 
   # High Availability
-  availability_zones = var.availability_zones
+  availability_zones = var.bastion_zones
 
   # Monitoring
   enable_diagnostic_settings = local.enable_diagnostics
