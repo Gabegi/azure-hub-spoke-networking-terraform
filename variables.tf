@@ -169,81 +169,59 @@ variable "firewall_dns_servers" {
 }
 
 # ============================================================================
-# Azure Bastion Configuration (Environment-Specific)
+# Azure Bastion Configuration
 # ============================================================================
 
-# Environment-specific Bastion configurations
-# Production: Standard SKU with all features for maximum capability
-# Dev/Test: Basic SKU with minimal features for cost optimization
-variable "bastion_config" {
-  type = map(object({
-    sku                = string
-    scale_units        = number
-    copy_paste_enabled = bool
-    file_copy_enabled  = bool
-    ip_connect_enabled = bool
-    tunneling_enabled  = bool
-    zones              = list(string)
-  }))
-  description = "Environment-specific Azure Bastion configurations"
-  default = {
-    prod = {
-      sku                = "Standard"
-      scale_units        = 2
-      copy_paste_enabled = true
-      file_copy_enabled  = true
-      ip_connect_enabled = true
-      tunneling_enabled  = true
-      zones              = ["1", "2", "3"]
-    }
-    staging = {
-      sku                = "Basic"
-      scale_units        = 2
-      copy_paste_enabled = true
-      file_copy_enabled  = false
-      ip_connect_enabled = false
-      tunneling_enabled  = false
-      zones              = ["1"]
-    }
-    dev = {
-      sku                = "Basic"
-      scale_units        = 2
-      copy_paste_enabled = true
-      file_copy_enabled  = false
-      ip_connect_enabled = false
-      tunneling_enabled  = false
-      zones              = ["1"]
-    }
-  }
-}
-
-# Manual override options (optional - will override environment-specific defaults)
-variable "bastion_sku_override" {
+variable "bastion_sku" {
   type        = string
-  description = "Override Bastion SKU (Basic or Standard). Leave null to use environment default."
-  default     = null
+  description = "Azure Bastion SKU (Basic or Standard)"
+  default     = "Standard"
 
   validation {
-    condition     = var.bastion_sku_override == null || contains(["Basic", "Standard"], var.bastion_sku_override)
+    condition     = contains(["Basic", "Standard"], var.bastion_sku)
     error_message = "Bastion SKU must be Basic or Standard."
   }
 }
 
-variable "bastion_scale_units_override" {
+variable "bastion_scale_units" {
   type        = number
-  description = "Override Bastion scale units (2-50, Standard SKU only). Leave null to use environment default."
-  default     = null
+  description = "Number of scale units for Azure Bastion (2-50, Standard SKU only)"
+  default     = 2
 
   validation {
-    condition     = var.bastion_scale_units_override == null || (var.bastion_scale_units_override >= 2 && var.bastion_scale_units_override <= 50)
+    condition     = var.bastion_scale_units >= 2 && var.bastion_scale_units <= 50
     error_message = "Bastion scale units must be between 2 and 50."
   }
 }
 
-variable "bastion_zones_override" {
+variable "bastion_copy_paste_enabled" {
+  type        = bool
+  description = "Enable copy/paste for Azure Bastion"
+  default     = true
+}
+
+variable "bastion_file_copy_enabled" {
+  type        = bool
+  description = "Enable file copy for Azure Bastion (Standard SKU only)"
+  default     = true
+}
+
+variable "bastion_ip_connect_enabled" {
+  type        = bool
+  description = "Enable IP-based connection for Azure Bastion (Standard SKU only)"
+  default     = true
+}
+
+variable "bastion_tunneling_enabled" {
+  type        = bool
+  description = "Enable tunneling for Azure Bastion (Standard SKU only)"
+  default     = true
+}
+
+variable "bastion_zones" {
   type        = list(string)
-  description = "Override availability zones for Bastion. Leave null to use environment default."
-  default     = null
+  description = "Availability zones for Azure Bastion"
+  default     = ["1", "2", "3"]
 }
 
 # ============================================================================
