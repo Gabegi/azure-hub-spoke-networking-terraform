@@ -197,10 +197,8 @@ Following [Azure tagging best practices](https://learn.microsoft.com/en-us/azure
 azure-hub-spoke-networking-terraform/
 ├── provider.tf                    # Terraform and Azure provider configuration
 ├── variables.tf                   # Root variables (CIDR blocks, regions, etc.)
-├── main.tf                        # Main orchestration (hub, spokes, peering)
-├── monitoring.tf                  # Shared monitoring (Log Analytics, Storage)
-├── outputs.tf                     # Network outputs (IDs, names, etc.)
 ├── terraform.tfvars.example       # Example variable values
+├── LICENSE                        # MIT License
 ├── README.md                      # This file
 ├── .gitignore                     # Git ignore rules
 │
@@ -212,6 +210,7 @@ azure-hub-spoke-networking-terraform/
 │   ├── 03-firewall.tf             # Azure Firewall
 │   ├── 04-bastion.tf              # Azure Bastion
 │   ├── 05-nsg.tf                  # Network Security Groups
+│   ├── 06-firewall-rules.tf       # Firewall policy rules
 │   └── 99-outputs.tf              # Hub outputs
 │
 ├── spoke-staging/                 # ⭐ Staging Spoke configuration
