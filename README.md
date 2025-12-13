@@ -514,6 +514,79 @@ Ensure sufficient quotas for:
 - VNet Peerings: 500 per VNet (default)
 - Public IPs: 1000 per region (default)
 
+## State Management
+
+### Remote Backend Configuration
+
+**IMPORTANT**: Always use remote state for production environments. Local state files are not suitable for team collaboration or production use.
+
+#### Option 1: Azure Storage Backend (Recommended)
+
+Create a storage account for Terraform state:
+
+```bash
+# Create resource group for Terraform state
+az group create \
+  --name rg-terraform-state \
+  --location westeurope
+
+# Create storage account
+az storage account create \
+  --name tfstate<uniqueid> \
+  --resource-group rg-terraform-state \
+  --location westeurope \
+  --sku Standard_LRS \
+  --encryption-services blob
+
+# Create blob container
+az storage container create \
+  --name tfstate \
+  --account-name tfstate<uniqueid>
+```
+
+Add backend configuration to `provider.tf`:
+
+```hcl
+terraform {
+  required_version = ">= 1.0"
+
+  backend "azurerm" {
+    resource_group_name  = "rg-terraform-state"
+    storage_account_name = "tfstate<uniqueid>"
+    container_name       = "tfstate"
+    key                  = "hub-spoke-network.tfstate"
+  }
+
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "~> 3.0"
+    }
+  }
+}
+```
+
+#### Option 2: Terraform Cloud
+
+```hcl
+terraform {
+  cloud {
+    organization = "your-organization"
+    workspaces {
+      name = "azure-hub-spoke-network"
+    }
+  }
+}
+```
+
+### State File Security
+
+- **Never commit** `terraform.tfstate` to version control
+- **Enable versioning** on your state storage account
+- **Use encryption** at rest and in transit
+- **Implement RBAC** to restrict state file access
+- **Enable soft delete** on storage account for recovery
+
 ## Quick Start
 
 ### 1. Clone and Initialize
