@@ -17,10 +17,11 @@ crash.*.log
 *.tfvars.json
 
 # Environment-specific tfvars (explicit listing for clarity)
-prod.tfvars
-dev.tfvars
-staging.tfvars
 terraform.tfvars
+environments/prod.tfvars
+environments/dev.tfvars
+environments/staging.tfvars
+environments/terraform.tfvars
 
 # Ignore override files as they are usually used to override resources locally and so
 # are not checked in
