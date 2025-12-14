@@ -82,6 +82,12 @@ variable "deploy_management_subnet" {
   default     = true
 }
 
+variable "deploy_app_gateway" {
+  type        = bool
+  description = "Deploy Application Gateway in hub"
+  default     = true
+}
+
 # ============================================================================
 # Spoke Deployment Flags
 # ============================================================================
@@ -221,6 +227,83 @@ variable "bastion_tunneling_enabled" {
 variable "bastion_zones" {
   type        = list(string)
   description = "Availability zones for Azure Bastion"
+  default     = ["1", "2", "3"]
+}
+
+# ============================================================================
+# Application Gateway Configuration
+# ============================================================================
+
+variable "app_gateway_sku_name" {
+  type        = string
+  description = "Application Gateway SKU name (Standard_v2 or WAF_v2)"
+  default     = "Standard_v2"
+
+  validation {
+    condition     = contains(["Standard_v2", "WAF_v2"], var.app_gateway_sku_name)
+    error_message = "Application Gateway SKU must be Standard_v2 or WAF_v2."
+  }
+}
+
+variable "app_gateway_sku_tier" {
+  type        = string
+  description = "Application Gateway SKU tier (Standard_v2 or WAF_v2)"
+  default     = "Standard_v2"
+
+  validation {
+    condition     = contains(["Standard_v2", "WAF_v2"], var.app_gateway_sku_tier)
+    error_message = "Application Gateway tier must be Standard_v2 or WAF_v2."
+  }
+}
+
+variable "app_gateway_enable_autoscale" {
+  type        = bool
+  description = "Enable autoscaling for Application Gateway"
+  default     = true
+}
+
+variable "app_gateway_min_capacity" {
+  type        = number
+  description = "Minimum autoscale capacity for Application Gateway"
+  default     = 2
+
+  validation {
+    condition     = var.app_gateway_min_capacity >= 1 && var.app_gateway_min_capacity <= 125
+    error_message = "Minimum capacity must be between 1 and 125."
+  }
+}
+
+variable "app_gateway_max_capacity" {
+  type        = number
+  description = "Maximum autoscale capacity for Application Gateway"
+  default     = 10
+
+  validation {
+    condition     = var.app_gateway_max_capacity >= 2 && var.app_gateway_max_capacity <= 125
+    error_message = "Maximum capacity must be between 2 and 125."
+  }
+}
+
+variable "app_gateway_enable_waf" {
+  type        = bool
+  description = "Enable Web Application Firewall on Application Gateway"
+  default     = false
+}
+
+variable "app_gateway_waf_mode" {
+  type        = string
+  description = "WAF mode (Detection or Prevention)"
+  default     = "Prevention"
+
+  validation {
+    condition     = contains(["Detection", "Prevention"], var.app_gateway_waf_mode)
+    error_message = "WAF mode must be Detection or Prevention."
+  }
+}
+
+variable "app_gateway_zones" {
+  type        = list(string)
+  description = "Availability zones for Application Gateway"
   default     = ["1", "2", "3"]
 }
 

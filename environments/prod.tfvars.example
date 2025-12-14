@@ -34,6 +34,7 @@ production_address_space = "10.2.0.0/16"
 deploy_firewall           = true
 deploy_bastion            = true
 deploy_gateway            = false  # Set to true for VPN/ExpressRoute
+deploy_app_gateway        = true   # Application Gateway for web apps
 deploy_management_subnet  = true
 
 # ============================================================================
@@ -72,6 +73,19 @@ bastion_file_copy_enabled  = true
 bastion_ip_connect_enabled = true
 bastion_tunneling_enabled  = true
 bastion_zones              = ["1", "2", "3"]
+
+# ============================================================================
+# Application Gateway Configuration - PRODUCTION
+# ============================================================================
+
+app_gateway_sku_name        = "Standard_v2"  # or "WAF_v2" for Web Application Firewall
+app_gateway_sku_tier        = "Standard_v2"
+app_gateway_enable_autoscale = true
+app_gateway_min_capacity    = 2
+app_gateway_max_capacity    = 10
+app_gateway_enable_waf      = false  # Set to true with WAF_v2 SKU for enhanced security
+app_gateway_waf_mode        = "Prevention"  # "Detection" or "Prevention"
+app_gateway_zones           = ["1", "2", "3"]
 
 # ============================================================================
 # High Availability

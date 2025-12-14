@@ -34,6 +34,7 @@ production_address_space = "10.2.0.0/16"
 deploy_firewall           = true   # Enabled to test firewall rules
 deploy_bastion            = true
 deploy_gateway            = false  # Optional - enable if testing VPN
+deploy_app_gateway        = true   # Enabled for testing web apps
 deploy_management_subnet  = true
 
 # ============================================================================
@@ -72,6 +73,19 @@ bastion_file_copy_enabled  = false     # Not available in Basic
 bastion_ip_connect_enabled = false     # Not available in Basic
 bastion_tunneling_enabled  = false     # Not available in Basic
 bastion_zones              = ["1"]     # Single zone for cost savings
+
+# ============================================================================
+# Application Gateway Configuration - STAGING (Balanced)
+# ============================================================================
+
+app_gateway_sku_name        = "Standard_v2"  # Match production for testing
+app_gateway_sku_tier        = "Standard_v2"
+app_gateway_enable_autoscale = true
+app_gateway_min_capacity    = 1  # Lower capacity for staging
+app_gateway_max_capacity    = 5  # Moderate max capacity
+app_gateway_enable_waf      = false  # Optional - enable to test WAF rules
+app_gateway_waf_mode        = "Detection"  # Use Detection in staging
+app_gateway_zones           = ["1", "2"]  # 2 zones for balance
 
 # ============================================================================
 # High Availability
