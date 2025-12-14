@@ -13,17 +13,17 @@ This folder contains environment-specific Terraform variable files (tfvars) for 
 
 ## Quick Start
 
-### 1. Copy the appropriate example file
+### 1. Copy the appropriate example file to vars/
 
 ```bash
 # For production
-cp environments/prod.tfvars.example environments/prod.tfvars
+cp environments/prod.tfvars.example vars/prod.tfvars
 
 # For development
-cp environments/dev.tfvars.example environments/dev.tfvars
+cp environments/dev.tfvars.example vars/dev.tfvars
 
 # For staging
-cp environments/staging.tfvars.example environments/staging.tfvars
+cp environments/staging.tfvars.example vars/staging.tfvars
 ```
 
 ### 2. Customize your values
@@ -42,10 +42,10 @@ Edit the copied `.tfvars` file with your specific configuration:
 terraform init
 
 # Plan deployment
-terraform plan -var-file="environments/prod.tfvars"
+terraform plan -var-file="vars/prod.tfvars"
 
 # Apply deployment
-terraform apply -var-file="environments/prod.tfvars"
+terraform apply -var-file="vars/prod.tfvars"
 ```
 
 ## Key Differences Between Environments
@@ -95,9 +95,9 @@ environments/
 └── terraform.tfvars.example     # Generic template
 ```
 
-When you copy the examples, you'll have:
+When you copy the examples to `vars/`, you'll have:
 ```
-environments/
+vars/
 ├── prod.tfvars         # ← Gitignored (your actual config)
 ├── dev.tfvars          # ← Gitignored (your actual config)
 └── staging.tfvars      # ← Gitignored (your actual config)
@@ -121,25 +121,25 @@ terraform apply -var-file="environments/prod.tfvars"
 ## Troubleshooting
 
 ### Issue: "File not found" error
-Make sure you're running terraform from the project root, not from the `environments/` folder:
+Make sure you're running terraform from the project root:
 ```bash
 # ✅ Correct (from project root)
-terraform apply -var-file="environments/prod.tfvars"
+terraform apply -var-file="vars/prod.tfvars"
 
-# ❌ Wrong (from environments folder)
-cd environments && terraform apply -var-file="prod.tfvars"
+# ❌ Wrong (from vars folder)
+cd vars && terraform apply -var-file="prod.tfvars"
 ```
 
 ### Issue: Variables not being applied
 Check that you specified the `-var-file` flag:
 ```bash
-terraform apply -var-file="environments/prod.tfvars"
+terraform apply -var-file="vars/prod.tfvars"
 ```
 
 ### Issue: Want to override a single variable
 You can combine var-file with individual var flags:
 ```bash
 terraform apply \
-  -var-file="environments/prod.tfvars" \
+  -var-file="vars/prod.tfvars" \
   -var="location=northeurope"
 ```
