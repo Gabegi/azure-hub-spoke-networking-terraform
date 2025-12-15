@@ -18,14 +18,10 @@ crash.*.log
 
 # Environment-specific tfvars (explicit listing for clarity)
 terraform.tfvars
-environments/prod.tfvars
-environments/dev.tfvars
-environments/staging.tfvars
-environments/terraform.tfvars
 
 # Actual variable files for testing
-vars/
 vars/*.tfvars
+!vars/example/*.tfvars.example
 
 # Ignore override files as they are usually used to override resources locally and so
 # are not checked in
