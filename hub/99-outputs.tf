@@ -54,8 +54,8 @@ output "management_subnet_id" {
 }
 
 output "app_gateway_subnet_id" {
-  value       = local.deploy_app_gateway ? module.app_gateway_subnet[0].subnet_id : null
-  description = "Application Gateway subnet ID (if deployed)"
+  value       = module.app_gateway_subnet.subnet_id
+  description = "Application Gateway subnet ID"
 }
 
 # ============================================================================
@@ -106,17 +106,17 @@ output "bastion_fqdn" {
 # ============================================================================
 
 output "app_gateway_id" {
-  value       = local.deploy_app_gateway ? module.app_gateway[0].app_gateway_id : null
+  value       = module.app_gateway.app_gateway_id
   description = "Application Gateway ID"
 }
 
 output "app_gateway_name" {
-  value       = local.deploy_app_gateway ? module.app_gateway[0].app_gateway_name : null
+  value       = module.app_gateway.app_gateway_name
   description = "Application Gateway name"
 }
 
 output "app_gateway_public_ip" {
-  value       = local.deploy_app_gateway ? module.app_gateway[0].public_ip_address : null
+  value       = module.app_gateway.public_ip_address
   description = "Application Gateway public IP address"
 }
 
@@ -130,7 +130,7 @@ output "management_nsg_id" {
 }
 
 output "app_gateway_nsg_id" {
-  value       = local.deploy_app_gateway ? module.app_gateway_nsg[0].nsg_id : null
+  value       = module.app_gateway_nsg.nsg_id
   description = "Application Gateway NSG ID"
 }
 
@@ -146,7 +146,6 @@ output "hub_summary" {
     firewall_deployed   = local.deploy_firewall
     firewall_private_ip = local.deploy_firewall ? module.firewall[0].firewall_private_ip : null
     bastion_deployed    = local.deploy_bastion
-    app_gateway_deployed = local.deploy_app_gateway
     management_deployed  = local.deploy_mgmt
   }
   description = "Hub configuration summary"

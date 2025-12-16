@@ -72,7 +72,6 @@ module "app_gateway_nsg_naming" {
 }
 
 module "app_gateway_nsg" {
-  count  = local.deploy_app_gateway ? 1 : 0
   source = "../modules/nsg"
 
   nsg_name            = module.app_gateway_nsg_naming.name
@@ -83,7 +82,7 @@ module "app_gateway_nsg" {
   security_rules = var.app_gateway_nsg_rules
 
   # Associate with app gateway subnet
-  subnet_id = module.app_gateway_subnet[0].subnet_id
+  subnet_id = module.app_gateway_subnet.subnet_id
 
   # Flow Logs
   enable_flow_logs                    = local.enable_flow_logs

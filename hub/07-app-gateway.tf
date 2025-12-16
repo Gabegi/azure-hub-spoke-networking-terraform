@@ -32,14 +32,13 @@ module "app_gateway_pip_naming" {
 # ============================================================================
 
 module "app_gateway" {
-  count  = local.deploy_app_gateway ? 1 : 0
   source = "../modules/app-gateway"
 
   app_gateway_name = module.app_gateway_naming.name
   public_ip_name   = module.app_gateway_pip_naming.name
   location         = var.location
   resource_group_name = module.rg_networking.rg_name
-  subnet_id        = module.app_gateway_subnet[0].subnet_id
+  subnet_id        = module.app_gateway_subnet.subnet_id
 
   # SKU Configuration
   sku_name          = var.app_gateway_sku_name

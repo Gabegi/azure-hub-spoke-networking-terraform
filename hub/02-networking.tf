@@ -92,9 +92,8 @@ module "management_subnet" {
   depends_on = [module.hub_vnet]
 }
 
-# Application Gateway Subnet (OPTIONAL)
+# Application Gateway Subnet
 module "app_gateway_subnet" {
-  count  = local.deploy_app_gateway ? 1 : 0
   source = "../modules/subnet"
 
   subnet_name          = "snet-appgw-${var.environment}-${var.location}-001"

@@ -12,10 +12,9 @@ locals {
   management_subnet  = "10.0.3.0/24"   # 256 IPs - Management subnet
 
   # Feature toggles
-  deploy_firewall    = var.deploy_firewall
-  deploy_bastion     = var.deploy_bastion
-  deploy_app_gateway = var.deploy_app_gateway
-  deploy_mgmt        = var.deploy_management_subnet
+  deploy_firewall = var.deploy_firewall
+  deploy_bastion  = var.deploy_bastion
+  deploy_mgmt     = var.deploy_management_subnet
 
   # Monitoring
   enable_diagnostics      = var.enable_diagnostics

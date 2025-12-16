@@ -31,10 +31,9 @@ production_address_space = "10.2.0.0/16"
 # Hub Feature Flags
 # ============================================================================
 
-deploy_firewall           = true
-deploy_bastion            = true
-deploy_app_gateway        = true   # Application Gateway for web apps
-deploy_management_subnet  = true
+deploy_firewall          = true
+deploy_bastion           = true
+deploy_management_subnet = true
 
 # ============================================================================
 # Spoke Deployment Flags
@@ -75,6 +74,7 @@ bastion_zones              = ["1", "2", "3"]
 
 # ============================================================================
 # Application Gateway Configuration - PRODUCTION
+# NOTE: Application Gateway is mandatory and always deployed
 # ============================================================================
 
 app_gateway_sku_name        = "Standard_v2"  # or "WAF_v2" for Web Application Firewall

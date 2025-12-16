@@ -76,12 +76,6 @@ variable "deploy_management_subnet" {
   default     = true
 }
 
-variable "deploy_app_gateway" {
-  type        = bool
-  description = "Deploy Application Gateway in hub"
-  default     = true
-}
-
 # ============================================================================
 # Spoke Deployment Flags
 # ============================================================================
