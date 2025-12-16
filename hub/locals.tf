@@ -8,14 +8,12 @@ locals {
   # Subnet CIDR blocks (calculated from hub address space)
   firewall_subnet    = "10.0.0.0/26"   # 64 IPs - AzureFirewallSubnet (required name)
   bastion_subnet     = "10.0.1.0/26"   # 64 IPs - AzureBastionSubnet (required name)
-  gateway_subnet     = "10.0.2.0/27"   # 32 IPs - GatewaySubnet (required name)
   app_gateway_subnet = "10.0.4.0/24"   # 256 IPs - Application Gateway subnet
   management_subnet  = "10.0.3.0/24"   # 256 IPs - Management subnet
 
   # Feature toggles
   deploy_firewall    = var.deploy_firewall
   deploy_bastion     = var.deploy_bastion
-  deploy_gateway     = var.deploy_gateway
   deploy_app_gateway = var.deploy_app_gateway
   deploy_mgmt        = var.deploy_management_subnet
 
