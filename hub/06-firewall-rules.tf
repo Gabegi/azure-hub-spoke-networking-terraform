@@ -2,7 +2,7 @@
 # Azure Firewall Policy Rules - Zero Trust Architecture
 #
 # Security Model:
-# - Staging: Full internet access (development environment)
+# - Development: Full internet access (development environment)
 # - Production: Restricted to essential services only
 # - Cross-environment: API calls only (no direct database access)
 # - Default: Deny all, allow explicitly
@@ -71,17 +71,17 @@ resource "azurerm_firewall_policy_rule_collection_group" "hub_rules" {
     priority = 200
     action   = "Allow"
 
-    # Staging → Production: HTTPS API calls ONLY (no direct database!)
+    # Development → Production: HTTPS API calls ONLY (no direct database!)
     rule {
-      name                  = "StagingToProdAPIs"
+      name                  = "DevelopmentToProdAPIs"
       protocols             = ["TCP"]
-      source_addresses      = ["10.1.0.0/16"] # Staging spoke
+      source_addresses      = ["10.1.0.0/16"] # Development spoke
       destination_addresses = ["10.2.0.0/16"] # Production spoke
       destination_ports     = ["443"]         # HTTPS only
     }
 
-    # ❌ REMOVED: Staging → Production SQL (no direct DB access!)
-    # ❌ REMOVED: Production → Staging (no reverse access!)
+    # ❌ REMOVED: Development → Production SQL (no direct DB access!)
+    # ❌ REMOVED: Production → Development (no reverse access!)
   }
 
   # Collection 3: Management Access (via Bastion)
@@ -180,16 +180,16 @@ resource "azurerm_firewall_policy_rule_collection_group" "hub_rules" {
     }
   }
 
-  # Collection 2: STAGING ENVIRONMENT - Full Azure + Internet Access
+  # Collection 2: DEVELOPMENT ENVIRONMENT - Full Azure + Internet Access
   application_rule_collection {
-    name     = "AllowStagingEnvironment"
+    name     = "AllowDevelopmentEnvironment"
     priority = 200
     action   = "Allow"
 
-    # Staging → Full Azure Services
+    # Development → Full Azure Services
     rule {
-      name             = "StagingToAzureFull"
-      source_addresses = ["10.1.0.0/16"] # Staging only
+      name             = "DevelopmentToAzureFull"
+      source_addresses = ["10.1.0.0/16"] # Development only
 
       protocols {
         type = "Https"
@@ -229,9 +229,9 @@ resource "azurerm_firewall_policy_rule_collection_group" "hub_rules" {
       ]
     }
 
-    # Staging → GitHub (for CI/CD)
+    # Development → GitHub (for CI/CD)
     rule {
-      name             = "StagingToGitHub"
+      name             = "DevelopmentToGitHub"
       source_addresses = ["10.1.0.0/16"]
 
       protocols {
@@ -249,9 +249,9 @@ resource "azurerm_firewall_policy_rule_collection_group" "hub_rules" {
       ]
     }
 
-    # Staging → General Internet HTTPS (for development)
+    # Development → General Internet HTTPS (for development)
     rule {
-      name             = "StagingToInternetHTTPS"
+      name             = "DevelopmentToInternetHTTPS"
       source_addresses = ["10.1.0.0/16"]
 
       protocols {

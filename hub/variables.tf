@@ -7,7 +7,7 @@
 
 variable "environment" {
   type        = string
-  description = "Environment name (prod, staging, dev)"
+  description = "Environment name (prod or dev)"
 }
 
 variable "location" {
