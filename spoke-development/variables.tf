@@ -1,5 +1,5 @@
-# spoke-staging/variables.tf
-# Input variables for Staging Spoke configuration
+# spoke-development/variables.tf
+# Input variables for Development Spoke configuration
 
 # ============================================================================
 # General Configuration
@@ -7,12 +7,12 @@
 
 variable "environment" {
   type        = string
-  description = "Environment name (staging)"
-  default     = "staging"
+  description = "Environment name (dev)"
+  default     = "dev"
 
   validation {
-    condition     = var.environment == "staging"
-    error_message = "Environment must be 'staging' for this spoke."
+    condition     = var.environment == "dev"
+    error_message = "Environment must be 'dev' for this spoke."
   }
 }
 
@@ -34,7 +34,7 @@ variable "tags" {
 
 variable "spoke_address_space" {
   type        = string
-  description = "Address space for staging spoke VNet"
+  description = "Address space for development spoke VNet"
   default     = "10.1.0.0/16"
 }
 
