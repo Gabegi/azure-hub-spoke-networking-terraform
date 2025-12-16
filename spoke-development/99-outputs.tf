@@ -1,5 +1,5 @@
-# spoke-staging/99-outputs.tf
-# Outputs from Staging Spoke configuration
+# spoke-development/99-outputs.tf
+# Outputs from Development Spoke configuration
 
 # ============================================================================
 # Resource Group Outputs
@@ -7,12 +7,12 @@
 
 output "resource_group_id" {
   value       = module.rg_spoke.rg_id
-  description = "Staging spoke resource group ID"
+  description = "Development spoke resource group ID"
 }
 
 output "resource_group_name" {
   value       = module.rg_spoke.rg_name
-  description = "Staging spoke resource group name"
+  description = "Development spoke resource group name"
 }
 
 # ============================================================================
@@ -21,17 +21,17 @@ output "resource_group_name" {
 
 output "vnet_id" {
   value       = module.spoke_vnet.vnet_id
-  description = "Staging spoke VNet ID"
+  description = "Development spoke VNet ID"
 }
 
 output "vnet_name" {
   value       = module.spoke_vnet.vnet_name
-  description = "Staging spoke VNet name"
+  description = "Development spoke VNet name"
 }
 
 output "vnet_address_space" {
   value       = module.spoke_vnet.vnet_address_space
-  description = "Staging spoke VNet address space"
+  description = "Development spoke VNet address space"
 }
 
 # ============================================================================
@@ -120,5 +120,5 @@ output "spoke_summary" {
     forced_tunneling    = local.enable_forced_tunneling
     peering_to_hub      = azurerm_virtual_network_peering.spoke_to_hub.name
   }
-  description = "Staging spoke configuration summary"
+  description = "Development spoke configuration summary"
 }

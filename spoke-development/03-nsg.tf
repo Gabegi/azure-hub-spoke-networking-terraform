@@ -1,5 +1,5 @@
-# spoke-staging/03-nsg.tf
-# Network Security Groups for Staging Spoke subnets
+# spoke-development/03-nsg.tf
+# Network Security Groups for Development Spoke subnets
 
 # ============================================================================
 # Naming Modules

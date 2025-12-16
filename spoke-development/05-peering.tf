@@ -1,5 +1,5 @@
-# spoke-staging/05-peering.tf
-# VNet Peering between Staging Spoke and Hub
+# spoke-development/05-peering.tf
+# VNet Peering between Development Spoke and Hub
 
 # ============================================================================
 # Naming Modules
@@ -9,7 +9,7 @@ module "spoke_to_hub_peering_naming" {
   source = "../modules/naming"
 
   resource_type = "peer"
-  workload      = "staging-to-hub"
+  workload      = "development-to-hub"
   environment   = var.environment
   location      = var.location
   instance      = "001"
@@ -20,7 +20,7 @@ module "hub_to_spoke_peering_naming" {
   source = "../modules/naming"
 
   resource_type = "peer"
-  workload      = "hub-to-staging"
+  workload      = "hub-to-development"
   environment   = var.environment
   location      = var.location
   instance      = "001"

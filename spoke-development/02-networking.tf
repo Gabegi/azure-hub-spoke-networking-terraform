@@ -1,5 +1,5 @@
-# spoke-staging/02-networking.tf
-# Staging Spoke VNet and Subnets
+# spoke-development/02-networking.tf
+# Development Spoke VNet and Subnets
 
 # ============================================================================
 # Naming Modules
@@ -9,7 +9,7 @@ module "spoke_vnet_naming" {
   source = "../modules/naming"
 
   resource_type = "vnet"
-  workload      = "spoke-staging"
+  workload      = "spoke-development"
   environment   = var.environment
   location      = var.location
   instance      = "001"

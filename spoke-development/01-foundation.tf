@@ -1,5 +1,5 @@
-# spoke-staging/01-foundation.tf
-# Resource Group for Staging Spoke
+# spoke-development/01-foundation.tf
+# Resource Group for Development Spoke
 
 # ============================================================================
 # Naming Modules
@@ -9,7 +9,7 @@ module "rg_naming" {
   source = "../modules/naming"
 
   resource_type = "rg"
-  workload      = "spoke-staging"
+  workload      = "spoke-development"
   environment   = var.environment
   location      = var.location
   instance      = "001"

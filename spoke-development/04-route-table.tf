@@ -1,5 +1,5 @@
-# spoke-staging/04-route-table.tf
-# Route Tables for Staging Spoke subnets
+# spoke-development/04-route-table.tf
+# Route Tables for Development Spoke subnets
 
 # ============================================================================
 # Naming Modules

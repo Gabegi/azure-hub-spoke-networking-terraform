@@ -1,5 +1,5 @@
-# spoke-staging/locals.tf
-# Local variables for Staging Spoke configuration
+# spoke-development/locals.tf
+# Local variables for Development Spoke configuration
 
 locals {
   # Network Configuration
