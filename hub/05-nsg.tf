@@ -79,82 +79,8 @@ module "app_gateway_nsg" {
   location            = var.location
   resource_group_name = module.rg_networking.rg_name
 
-  security_rules = [
-    # INBOUND RULES - Required for App Gateway to function
-    {
-      name                       = "AllowGatewayManager"
-      priority                   = 100
-      direction                  = "Inbound"
-      access                     = "Allow"
-      protocol                   = "Tcp"
-      source_port_range          = "*"
-      destination_port_range     = "65200-65535"
-      source_address_prefix      = "GatewayManager"
-      destination_address_prefix = "*"
-      description                = "Allow Azure Gateway Manager for control plane (required)"
-    },
-    {
-      name                       = "AllowAzureLoadBalancer"
-      priority                   = 110
-      direction                  = "Inbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "*"
-      source_address_prefix      = "AzureLoadBalancer"
-      destination_address_prefix = "*"
-      description                = "Allow Azure Load Balancer health probes (required)"
-    },
-    {
-      name                       = "AllowHTTPSFromInternet"
-      priority                   = 120
-      direction                  = "Inbound"
-      access                     = "Allow"
-      protocol                   = "Tcp"
-      source_port_range          = "*"
-      destination_port_range     = "443"
-      source_address_prefix      = "Internet"
-      destination_address_prefix = "*"
-      description                = "Allow HTTPS from Internet"
-    },
-    {
-      name                       = "DenyAllInbound"
-      priority                   = 4096
-      direction                  = "Inbound"
-      access                     = "Deny"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "*"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "Deny all other inbound traffic"
-    },
-    # OUTBOUND RULES - Required for App Gateway to function
-    {
-      name                       = "AllowHTTPSToInternet"
-      priority                   = 100
-      direction                  = "Outbound"
-      access                     = "Allow"
-      protocol                   = "Tcp"
-      source_port_range          = "*"
-      destination_port_range     = "443"
-      source_address_prefix      = "*"
-      destination_address_prefix = "Internet"
-      description                = "Allow HTTPS to Internet (certificate validation, Azure Monitor)"
-    },
-    {
-      name                       = "AllowHTTPSToBackend"
-      priority                   = 110
-      direction                  = "Outbound"
-      access                     = "Allow"
-      protocol                   = "Tcp"
-      source_port_range          = "*"
-      destination_port_range     = "443"
-      source_address_prefix      = "*"
-      destination_address_prefix = "VirtualNetwork"
-      description                = "Allow HTTPS to backend pools in VNet"
-    }
-  ]
+  # Security rules from variables
+  security_rules = var.app_gateway_nsg_rules
 
   # Associate with app gateway subnet
   subnet_id = module.app_gateway_subnet[0].subnet_id
