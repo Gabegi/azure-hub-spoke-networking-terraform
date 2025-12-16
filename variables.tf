@@ -302,6 +302,44 @@ variable "app_gateway_zones" {
 }
 
 # ============================================================================
+# Network Security Group Rules
+# ============================================================================
+
+variable "management_nsg_rules" {
+  type = list(object({
+    name                       = string
+    priority                   = number
+    direction                  = string
+    access                     = string
+    protocol                   = string
+    source_port_range          = string
+    destination_port_range     = string
+    source_address_prefix      = string
+    destination_address_prefix = string
+    description                = string
+  }))
+  description = "Security rules for Management subnet NSG"
+  default     = []
+}
+
+variable "app_gateway_nsg_rules" {
+  type = list(object({
+    name                       = string
+    priority                   = number
+    direction                  = string
+    access                     = string
+    protocol                   = string
+    source_port_range          = string
+    destination_port_range     = string
+    source_address_prefix      = string
+    destination_address_prefix = string
+    description                = string
+  }))
+  description = "Security rules for Application Gateway subnet NSG"
+  default     = []
+}
+
+# ============================================================================
 # High Availability
 # ============================================================================
 
