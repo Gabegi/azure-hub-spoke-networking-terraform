@@ -33,7 +33,7 @@ production_address_space = "10.2.0.0/16"
 
 deploy_firewall           = true   # Enabled to test firewall rules
 deploy_bastion            = true
-deploy_gateway            = false  # Optional - enable if testing VPN
+
 deploy_app_gateway        = true   # Enabled for testing web apps
 deploy_management_subnet  = true
 

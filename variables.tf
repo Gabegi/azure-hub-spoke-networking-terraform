@@ -70,12 +70,6 @@ variable "deploy_bastion" {
   default     = true
 }
 
-variable "deploy_gateway" {
-  type        = bool
-  description = "Deploy VPN/ExpressRoute gateway subnet in hub"
-  default     = false
-}
-
 variable "deploy_management_subnet" {
   type        = bool
   description = "Deploy management subnet in hub"

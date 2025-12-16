@@ -33,7 +33,6 @@ production_address_space = "10.2.0.0/16"
 
 deploy_firewall           = true
 deploy_bastion            = true
-deploy_gateway            = false  # Set to true for VPN/ExpressRoute
 deploy_app_gateway        = true   # Application Gateway for web apps
 deploy_management_subnet  = true
 

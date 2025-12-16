@@ -72,19 +72,6 @@ module "bastion_subnet" {
   depends_on = [module.hub_vnet]
 }
 
-# GatewaySubnet (OPTIONAL - for future VPN/ExpressRoute)
-module "gateway_subnet" {
-  count  = local.deploy_gateway ? 1 : 0
-  source = "../modules/subnet"
-
-  subnet_name          = "GatewaySubnet"
-  resource_group_name  = module.rg_networking.rg_name
-  virtual_network_name = module.hub_vnet.vnet_name
-  address_prefixes     = [local.gateway_subnet]
-
-  depends_on = [module.hub_vnet]
-}
-
 # Management Subnet (OPTIONAL)
 module "management_subnet" {
   count  = local.deploy_mgmt ? 1 : 0
