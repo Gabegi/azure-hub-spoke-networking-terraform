@@ -53,10 +53,10 @@ variable "deploy_bastion" {
   default     = true
 }
 
-variable "deploy_gateway" {
+variable "deploy_app_gateway" {
   type        = bool
-  description = "Deploy VPN Gateway subnet (future use)"
-  default     = false
+  description = "Deploy Application Gateway in hub"
+  default     = true
 }
 
 variable "deploy_management_subnet" {
@@ -131,6 +131,102 @@ variable "bastion_tunneling_enabled" {
   type        = bool
   description = "Enable tunneling (Standard SKU only)"
   default     = false
+}
+
+variable "bastion_zones" {
+  type        = list(string)
+  description = "Availability zones for Azure Bastion"
+  default     = ["1", "2", "3"]
+}
+
+# ============================================================================
+# Application Gateway Configuration
+# ============================================================================
+
+variable "app_gateway_sku_name" {
+  type        = string
+  description = "Application Gateway SKU name (Standard_v2 or WAF_v2)"
+  default     = "Standard_v2"
+}
+
+variable "app_gateway_sku_tier" {
+  type        = string
+  description = "Application Gateway SKU tier (Standard_v2 or WAF_v2)"
+  default     = "Standard_v2"
+}
+
+variable "app_gateway_enable_autoscale" {
+  type        = bool
+  description = "Enable autoscaling for Application Gateway"
+  default     = true
+}
+
+variable "app_gateway_min_capacity" {
+  type        = number
+  description = "Minimum autoscale capacity for Application Gateway"
+  default     = 2
+}
+
+variable "app_gateway_max_capacity" {
+  type        = number
+  description = "Maximum autoscale capacity for Application Gateway"
+  default     = 10
+}
+
+variable "app_gateway_zones" {
+  type        = list(string)
+  description = "Availability zones for Application Gateway"
+  default     = ["1", "2", "3"]
+}
+
+variable "app_gateway_enable_waf" {
+  type        = bool
+  description = "Enable Web Application Firewall on Application Gateway"
+  default     = false
+}
+
+variable "app_gateway_waf_mode" {
+  type        = string
+  description = "WAF mode (Detection or Prevention)"
+  default     = "Prevention"
+}
+
+# ============================================================================
+# Network Security Group Rules
+# ============================================================================
+
+variable "management_nsg_rules" {
+  type = list(object({
+    name                       = string
+    priority                   = number
+    direction                  = string
+    access                     = string
+    protocol                   = string
+    source_port_range          = string
+    destination_port_range     = string
+    source_address_prefix      = string
+    destination_address_prefix = string
+    description                = string
+  }))
+  description = "Security rules for Management subnet NSG"
+  default     = []
+}
+
+variable "app_gateway_nsg_rules" {
+  type = list(object({
+    name                       = string
+    priority                   = number
+    direction                  = string
+    access                     = string
+    protocol                   = string
+    source_port_range          = string
+    destination_port_range     = string
+    source_address_prefix      = string
+    destination_address_prefix = string
+    description                = string
+  }))
+  description = "Security rules for Application Gateway subnet NSG"
+  default     = []
 }
 
 # ============================================================================

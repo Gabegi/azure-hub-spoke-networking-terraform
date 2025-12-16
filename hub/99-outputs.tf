@@ -48,14 +48,14 @@ output "bastion_subnet_id" {
   description = "Bastion subnet ID"
 }
 
-output "gateway_subnet_id" {
-  value       = local.deploy_gateway ? module.gateway_subnet[0].subnet_id : null
-  description = "Gateway subnet ID (if deployed)"
-}
-
 output "management_subnet_id" {
   value       = local.deploy_mgmt ? module.management_subnet[0].subnet_id : null
   description = "Management subnet ID (if deployed)"
+}
+
+output "app_gateway_subnet_id" {
+  value       = local.deploy_app_gateway ? module.app_gateway_subnet[0].subnet_id : null
+  description = "Application Gateway subnet ID (if deployed)"
 }
 
 # ============================================================================
@@ -102,6 +102,25 @@ output "bastion_fqdn" {
 }
 
 # ============================================================================
+# Application Gateway Outputs
+# ============================================================================
+
+output "app_gateway_id" {
+  value       = local.deploy_app_gateway ? module.app_gateway[0].app_gateway_id : null
+  description = "Application Gateway ID"
+}
+
+output "app_gateway_name" {
+  value       = local.deploy_app_gateway ? module.app_gateway[0].app_gateway_name : null
+  description = "Application Gateway name"
+}
+
+output "app_gateway_public_ip" {
+  value       = local.deploy_app_gateway ? module.app_gateway[0].public_ip_address : null
+  description = "Application Gateway public IP address"
+}
+
+# ============================================================================
 # NSG Outputs
 # ============================================================================
 
@@ -110,20 +129,25 @@ output "management_nsg_id" {
   description = "Management NSG ID"
 }
 
+output "app_gateway_nsg_id" {
+  value       = local.deploy_app_gateway ? module.app_gateway_nsg[0].nsg_id : null
+  description = "Application Gateway NSG ID"
+}
+
 # ============================================================================
 # Summary Output
 # ============================================================================
 
 output "hub_summary" {
   value = {
-    resource_group      = module.rg_networking.rg_name
-    vnet_name          = module.hub_vnet.vnet_name
-    vnet_address_space = local.hub_address_space
-    firewall_deployed  = local.deploy_firewall
+    resource_group       = module.rg_networking.rg_name
+    vnet_name           = module.hub_vnet.vnet_name
+    vnet_address_space  = local.hub_address_space
+    firewall_deployed   = local.deploy_firewall
     firewall_private_ip = local.deploy_firewall ? module.firewall[0].firewall_private_ip : null
-    bastion_deployed   = local.deploy_bastion
-    gateway_deployed   = local.deploy_gateway
-    management_deployed = local.deploy_mgmt
+    bastion_deployed    = local.deploy_bastion
+    app_gateway_deployed = local.deploy_app_gateway
+    management_deployed  = local.deploy_mgmt
   }
   description = "Hub configuration summary"
 }
