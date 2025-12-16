@@ -29,44 +29,35 @@ module "management_nsg" {
   resource_group_name = module.rg_networking.rg_name
 
   security_rules = [
+    # ========================================================================
+    # INBOUND RULES - Very Restrictive
+    # ========================================================================
     {
-      name                       = "AllowBastionSSH"
+      name                       = "Allow-SSH-From-Bastion"
       priority                   = 100
       direction                  = "Inbound"
       access                     = "Allow"
       protocol                   = "Tcp"
       source_port_range          = "*"
       destination_port_range     = "22"
-      source_address_prefix      = local.bastion_subnet
-      destination_address_prefix = "*"
+      source_address_prefix      = "AzureBastionSubnet"
+      destination_address_prefix = "VirtualNetwork"
       description                = "Allow SSH from Bastion subnet"
     },
     {
-      name                       = "AllowBastionRDP"
+      name                       = "Allow-RDP-From-Bastion"
       priority                   = 110
       direction                  = "Inbound"
       access                     = "Allow"
       protocol                   = "Tcp"
       source_port_range          = "*"
       destination_port_range     = "3389"
-      source_address_prefix      = local.bastion_subnet
-      destination_address_prefix = "*"
+      source_address_prefix      = "AzureBastionSubnet"
+      destination_address_prefix = "VirtualNetwork"
       description                = "Allow RDP from Bastion subnet"
     },
     {
-      name                       = "AllowHTTPSOutbound"
-      priority                   = 100
-      direction                  = "Outbound"
-      access                     = "Allow"
-      protocol                   = "Tcp"
-      source_port_range          = "*"
-      destination_port_range     = "443"
-      source_address_prefix      = "*"
-      destination_address_prefix = "Internet"
-      description                = "Allow HTTPS to Internet"
-    },
-    {
-      name                       = "DenyAllInbound"
+      name                       = "Deny-All-Inbound"
       priority                   = 4096
       direction                  = "Inbound"
       access                     = "Deny"
@@ -76,6 +67,129 @@ module "management_nsg" {
       source_address_prefix      = "*"
       destination_address_prefix = "*"
       description                = "Deny all other inbound traffic"
+    },
+    # ========================================================================
+    # OUTBOUND RULES - More Permissive for Admin Tasks
+    # ========================================================================
+    {
+      name                       = "Allow-SSH-to-Spokes"
+      priority                   = 100
+      direction                  = "Outbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "22"
+      source_address_prefix      = "VirtualNetwork"
+      destination_address_prefix = "VirtualNetwork"
+      description                = "Allow SSH to spoke VMs"
+    },
+    {
+      name                       = "Allow-RDP-to-Spokes"
+      priority                   = 110
+      direction                  = "Outbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "3389"
+      source_address_prefix      = "VirtualNetwork"
+      destination_address_prefix = "VirtualNetwork"
+      description                = "Allow RDP to spoke VMs"
+    },
+    {
+      name                       = "Allow-WinRM-to-Spokes"
+      priority                   = 120
+      direction                  = "Outbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "5985-5986"
+      source_address_prefix      = "VirtualNetwork"
+      destination_address_prefix = "VirtualNetwork"
+      description                = "Allow WinRM to spoke VMs (PowerShell remoting)"
+    },
+    {
+      name                       = "Allow-HTTPS-Internet"
+      priority                   = 200
+      direction                  = "Outbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "443"
+      source_address_prefix      = "VirtualNetwork"
+      destination_address_prefix = "Internet"
+      description                = "Allow HTTPS to Internet"
+    },
+    {
+      name                       = "Allow-HTTP-Internet"
+      priority                   = 210
+      direction                  = "Outbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "80"
+      source_address_prefix      = "VirtualNetwork"
+      destination_address_prefix = "Internet"
+      description                = "Allow HTTP to Internet (package updates)"
+    },
+    {
+      name                       = "Allow-DNS-TCP"
+      priority                   = 220
+      direction                  = "Outbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "53"
+      source_address_prefix      = "VirtualNetwork"
+      destination_address_prefix = "Internet"
+      description                = "Allow DNS TCP to Internet"
+    },
+    {
+      name                       = "Allow-DNS-UDP"
+      priority                   = 221
+      direction                  = "Outbound"
+      access                     = "Allow"
+      protocol                   = "Udp"
+      source_port_range          = "*"
+      destination_port_range     = "53"
+      source_address_prefix      = "VirtualNetwork"
+      destination_address_prefix = "Internet"
+      description                = "Allow DNS UDP to Internet"
+    },
+    {
+      name                       = "Allow-NTP"
+      priority                   = 230
+      direction                  = "Outbound"
+      access                     = "Allow"
+      protocol                   = "Udp"
+      source_port_range          = "*"
+      destination_port_range     = "123"
+      source_address_prefix      = "VirtualNetwork"
+      destination_address_prefix = "Internet"
+      description                = "Allow NTP to Internet (time sync)"
+    },
+    {
+      name                       = "Allow-AzureMonitor"
+      priority                   = 300
+      direction                  = "Outbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "443"
+      source_address_prefix      = "VirtualNetwork"
+      destination_address_prefix = "AzureMonitor"
+      description                = "Allow HTTPS to Azure Monitor"
+    },
+    {
+      name                       = "Allow-AzureStorage"
+      priority                   = 310
+      direction                  = "Outbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "443"
+      source_address_prefix      = "VirtualNetwork"
+      destination_address_prefix = "Storage"
+      description                = "Allow HTTPS to Azure Storage"
     }
   ]
 
