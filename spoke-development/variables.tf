@@ -166,3 +166,13 @@ variable "lock_level" {
     error_message = "Lock level must be CanNotDelete or ReadOnly."
   }
 }
+
+# ============================================================================
+# VM Configuration
+# ============================================================================
+
+variable "vm_admin_ssh_public_key" {
+  type        = string
+  description = "SSH public key for VM admin user"
+  default     = null
+}
