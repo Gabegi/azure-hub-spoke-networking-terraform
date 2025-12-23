@@ -53,20 +53,7 @@ module "workload_route_table" {
   # Disable BGP route propagation to prevent on-premises routes
   disable_bgp_route_propagation = true
 
-  routes = [
-    {
-      name                   = "default-via-firewall"
-      address_prefix         = "0.0.0.0/0"
-      next_hop_type          = "VirtualAppliance"
-      next_hop_in_ip_address = local.next_hop_firewall_ip
-    },
-    {
-      name                   = "to-production-spoke"
-      address_prefix         = "10.2.0.0/16"  # Production spoke
-      next_hop_type          = "VirtualAppliance"
-      next_hop_in_ip_address = local.next_hop_firewall_ip
-    }
-  ]
+  routes = var.route_table_routes
 
   # Associate with workload subnet
   subnet_id = module.workload_subnet[0].subnet_id
