@@ -80,20 +80,7 @@ module "data_route_table" {
   # Disable BGP route propagation
   disable_bgp_route_propagation = true
 
-  routes = [
-    {
-      name                   = "default-via-firewall"
-      address_prefix         = "0.0.0.0/0"
-      next_hop_type          = "VirtualAppliance"
-      next_hop_in_ip_address = local.next_hop_firewall_ip
-    },
-    {
-      name                   = "to-production-spoke"
-      address_prefix         = "10.2.0.0/16"  # Production spoke
-      next_hop_type          = "VirtualAppliance"
-      next_hop_in_ip_address = local.next_hop_firewall_ip
-    }
-  ]
+  routes = var.route_table_routes
 
   # Associate with data subnet
   subnet_id = module.data_subnet[0].subnet_id
@@ -120,20 +107,7 @@ module "app_route_table" {
   # Disable BGP route propagation
   disable_bgp_route_propagation = true
 
-  routes = [
-    {
-      name                   = "default-via-firewall"
-      address_prefix         = "0.0.0.0/0"
-      next_hop_type          = "VirtualAppliance"
-      next_hop_in_ip_address = local.next_hop_firewall_ip
-    },
-    {
-      name                   = "to-production-spoke"
-      address_prefix         = "10.2.0.0/16"  # Production spoke
-      next_hop_type          = "VirtualAppliance"
-      next_hop_in_ip_address = local.next_hop_firewall_ip
-    }
-  ]
+  routes = var.route_table_routes
 
   # Associate with app subnet
   subnet_id = module.app_subnet[0].subnet_id
