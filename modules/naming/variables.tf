@@ -17,7 +17,10 @@ variable "resource_type" {
       "log",     # Log Analytics
       "st",      # Storage Account
       "rg",      # Resource Group
-      "peer"     # VNet Peering
+      "peer",    # VNet Peering
+      "vm",      # Virtual Machine
+      "nic",     # Network Interface
+      "agw"      # Application Gateway
     ], var.resource_type)
     error_message = "Must use approved Microsoft abbreviations"
   }
