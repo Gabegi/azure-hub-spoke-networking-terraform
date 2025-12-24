@@ -106,6 +106,20 @@ output "hub_to_spoke_peering_id" {
 }
 
 # ============================================================================
+# Test VM Outputs
+# ============================================================================
+
+output "test_vm_id" {
+  value       = local.deploy_workload_subnet && length(module.test_vm) > 0 ? module.test_vm[0].vm_id : null
+  description = "Test VM resource ID"
+}
+
+output "test_vm_private_ip" {
+  value       = local.deploy_workload_subnet && length(module.test_vm) > 0 ? module.test_vm[0].vm_private_ip : null
+  description = "Test VM private IP address"
+}
+
+# ============================================================================
 # Summary Output
 # ============================================================================
 
