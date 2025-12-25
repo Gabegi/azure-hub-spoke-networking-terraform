@@ -5,6 +5,12 @@
 # General Configuration
 # ============================================================================
 
+variable "subscription_id" {
+  type        = string
+  description = "Azure subscription ID"
+  sensitive   = true
+}
+
 variable "environment" {
   type        = string
   description = "Environment name (dev)"
