@@ -22,18 +22,8 @@ dependency "hub" {
 
 # Development Spoke specific inputs
 inputs = {
-  subscription_id = "YOUR-SUBSCRIPTION-ID-HERE"  # Replace with your Azure subscription ID
-
-  # Environment
-  environment = "dev"
-
-  # Network Configuration
-  spoke_address_space = "10.1.0.0/16"
-
-  # Subnet Deployment Flags
-  deploy_workload_subnet = true
-  deploy_data_subnet     = true
-  deploy_app_subnet      = true
+  # Required variables (no defaults in variables.tf)
+  # subscription_id: Set via environment variable TF_VAR_subscription_id or pass via -var flag
 
   # Hub Integration - Automatically get values from hub outputs
   hub_vnet_id              = dependency.hub.outputs.hub_vnet_id
@@ -41,32 +31,12 @@ inputs = {
   hub_resource_group_name  = dependency.hub.outputs.hub_resource_group_name
   hub_firewall_private_ip  = try(dependency.hub.outputs.hub_firewall_private_ip, null)
 
-  # Route Table Configuration
-  enable_forced_tunneling = false  # No firewall in dev
-  route_table_routes = [
-    {
-      name                   = "default-via-firewall"
-      address_prefix         = "0.0.0.0/0"
-      next_hop_type          = "VirtualAppliance"
-      next_hop_in_ip_address = "10.0.0.4"
-    },
-    {
-      name                   = "to-production-spoke"
-      address_prefix         = "10.2.0.0/16"
-      next_hop_type          = "VirtualAppliance"
-      next_hop_in_ip_address = "10.0.0.4"
-    }
-  ]
-
-  # VM Configuration
+  # VM SSH Key (required if deploying VMs)
   vm_admin_ssh_public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC... (REPLACE_WITH_YOUR_PUBLIC_KEY)"
 
-  # Monitoring
-  enable_diagnostics         = true
-  enable_flow_logs           = false
-  enable_traffic_analytics   = false
-  traffic_analytics_interval = 60
-
-  # Resource Lock
-  enable_resource_lock = false
+  # Optional: Override defaults from variables.tf if needed
+  # environment         = "dev"           # default: "dev"
+  # location            = "westeurope"     # default: "westeurope"
+  # spoke_address_space = "10.1.0.0/16"   # default: "10.1.0.0/16"
+  # route_table_routes  = [...]            # default: []
 }
