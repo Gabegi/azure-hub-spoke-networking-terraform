@@ -5,12 +5,6 @@ include "root" {
   path = find_in_parent_folders()
 }
 
-# Load environment variables
-locals {
-  env_vars = read_terragrunt_config(find_in_parent_folders("env.hcl"))
-  environment = local.env_vars.locals.environment
-}
-
 # Spoke depends on Hub - Terragrunt will deploy hub first
 dependency "hub" {
   config_path = "../hub"

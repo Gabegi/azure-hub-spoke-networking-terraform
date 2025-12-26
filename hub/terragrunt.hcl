@@ -5,20 +5,6 @@ include "root" {
   path = find_in_parent_folders()
 }
 
-# Load environment variables
-locals {
-  env_vars = read_terragrunt_config(find_in_parent_folders("env.hcl"))
-  environment = local.env_vars.locals.environment
-
-  # Load environment-specific tfvars
-  tfvars = read_terragrunt_config(find_in_parent_folders("vars/${local.environment}.tfvars"))
-}
-
-# Hub has no dependencies - it's deployed first
-dependencies {
-  paths = []
-}
-
 # Hub-specific inputs
 inputs = {
   # Merge with root inputs and add hub-specific variables
