@@ -2,6 +2,17 @@
 
 This repository uses **Terragrunt** to manage the Hub-Spoke infrastructure deployment with automatic dependency management and state orchestration.
 
+## ⚠️ IMPORTANT: Use Terragrunt Commands, NOT Terraform
+
+**DO NOT run `terraform init`, `terraform plan`, or `terraform apply`**
+
+Instead, use Terragrunt commands:
+- ❌ `terraform init` → ✅ `terragrunt init` or `terragrunt run-all init`
+- ❌ `terraform plan` → ✅ `terragrunt plan` or `terragrunt run-all plan`
+- ❌ `terraform apply` → ✅ `terragrunt apply` or `terragrunt run-all apply`
+
+Terragrunt wraps Terraform and adds automatic dependency management, remote state configuration, and DRY principles.
+
 ## Prerequisites
 
 1. **Install Terragrunt**:
