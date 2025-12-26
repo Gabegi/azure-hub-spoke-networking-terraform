@@ -1,21 +1,5 @@
 # Root Terragrunt Configuration
-# This file contains common configuration for all environments
-
-locals {
-  # Automatically load environment-level variables
-  environment_vars = read_terragrunt_config(find_in_parent_folders("env.hcl", "env.hcl"))
-  environment      = try(local.environment_vars.locals.environment, "dev")
-
-  # Azure region
-  location = "westeurope"
-
-  # Common tags
-  common_tags = {
-    Project     = "HubSpokeNetwork"
-    ManagedBy   = "Terragrunt"
-    Environment = local.environment
-  }
-}
+# This file contains common configuration for all modules
 
 # Generate an Azure provider block
 generate "provider" {
@@ -50,13 +34,6 @@ provider "azurerm" {
 EOF
 }
 
-# Remote state disabled - using local state files
+# Remote state disabled - using local state files for this project
 # Each module will store its state locally in terraform.tfstate
-# Note: For production, consider enabling remote state with Azure Storage
-
-# Inputs that are common across all modules
-inputs = {
-  environment = local.environment
-  location    = local.location
-  tags        = local.common_tags
-}
+# Note: For production, enable remote state with Azure Storage
