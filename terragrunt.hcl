@@ -50,26 +50,9 @@ provider "azurerm" {
 EOF
 }
 
-# Configure Terragrunt to automatically store state files in Azure Storage
-remote_state {
-  backend = "azurerm"
-
-  generate = {
-    path      = "backend.tf"
-    if_exists = "overwrite_terragrunt"
-  }
-
-  config = {
-    # Storage account for Terraform state
-    resource_group_name  = "rg-terraform-state-${local.environment}-${local.location}"
-    storage_account_name = "sttfstate${local.environment}${replace(local.location, "-", "")}"  # Must be globally unique
-    container_name       = "tfstate"
-    key                  = "${path_relative_to_include()}/terraform.tfstate"
-
-    # Enable state locking
-    use_azuread_auth = true
-  }
-}
+# Remote state disabled - using local state files
+# Each module will store its state locally in terraform.tfstate
+# Note: For production, consider enabling remote state with Azure Storage
 
 # Inputs that are common across all modules
 inputs = {
