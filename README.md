@@ -16,6 +16,43 @@ Instead, use Terragrunt commands:
 
 Terragrunt wraps Terraform and adds automatic dependency management, remote state configuration, and DRY principles.
 
+with Terragrunt, you don't run terraform init at all. You use Terragrunt commands instead.
+
+From Root Directory:
+
+# Initialize all modules (hub + both spokes)
+
+terragrunt run-all init
+
+# Plan all modules
+
+terragrunt run-all plan
+
+# Apply all modules (deploys everything in correct order)
+
+terragrunt run-all apply
+
+Or Initialize Individual Modules:
+
+# Initialize just the hub
+
+cd hub
+terragrunt init
+
+# Initialize just dev spoke
+
+cd spoke-development
+terragrunt init
+
+What Terragrunt Does
+
+When you run terragrunt init, it:
+
+1. Auto-generates backend.tf (Azure Storage state config)
+2. Auto-generates provider.tf (Azure provider)
+3. Runs terraform init for you automatically
+4. Configures remote state
+
 ## Table of Contents
 
 - [Overview](#overview)
