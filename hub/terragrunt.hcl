@@ -22,7 +22,7 @@ dependencies {
 # Hub-specific inputs
 inputs = {
   # Merge with root inputs and add hub-specific variables
-  subscription_id = "7c8a8cb5-ee45-4e6e-9a20-4534c4796d8b"
+  subscription_id = "YOUR-SUBSCRIPTION-ID-HERE"  # Replace with your Azure subscription ID
 
   # Network Configuration
   hub_address_space = "10.0.0.0/16"
