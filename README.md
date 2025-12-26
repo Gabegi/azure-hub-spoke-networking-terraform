@@ -2,7 +2,22 @@
 
 Production-ready Azure hub-spoke network topology implemented using Terraform, following Microsoft best practices for enterprise networking with Zero Trust security model.
 
+This repository uses **Terragrunt** to manage the Hub-Spoke infrastructure deployment with automatic dependency management and state orchestration.
+
+## ⚠️ IMPORTANT: Use Terragrunt Commands, NOT Terraform
+
+**DO NOT run `terraform init`, `terraform plan`, or `terraform apply`**
+
+Instead, use Terragrunt commands:
+
+- ❌ `terraform init` → ✅ `terragrunt init` or `terragrunt run-all init`
+- ❌ `terraform plan` → ✅ `terragrunt plan` or `terragrunt run-all plan`
+- ❌ `terraform apply` → ✅ `terragrunt apply` or `terragrunt run-all apply`
+
+Terragrunt wraps Terraform and adds automatic dependency management, remote state configuration, and DRY principles.
+
 ## Table of Contents
+
 - [Overview](#overview)
 - [Architecture](#architecture)
 - [Key Features](#key-features)
@@ -18,6 +33,7 @@ Production-ready Azure hub-spoke network topology implemented using Terraform, f
 ## Overview
 
 This Terraform project implements a **hub-spoke network topology** in Azure with **two environments**:
+
 - **Development** (10.1.0.0/16) - Full internet access for development
 - **Production** (10.2.0.0/16) - Restricted access with Zero Trust principles
 
@@ -26,29 +42,34 @@ All infrastructure is **fully variable-driven**, making it easy to customize and
 ### Key Features
 
 ✅ **Hub-Spoke Architecture**
+
 - Centralized hub VNet (10.0.0.0/16) with Azure Firewall and Bastion
 - Two spoke VNets (Development and Production)
 - VNet peering with forced tunneling through hub firewall
 
 ✅ **Security**
+
 - Azure Firewall with Zero Trust policies
 - NSG rules fully configurable via variables
 - Route tables with explicit spoke-to-spoke routes
 - Azure Bastion for secure VM access (no public IPs)
 
 ✅ **Network Services**
+
 - Application Gateway (mandatory, always deployed)
 - Azure Firewall (Standard/Premium SKU)
 - Azure Bastion (Basic/Standard SKU)
 - Management subnet (ready for jumpboxes)
 
 ✅ **Infrastructure as Code**
+
 - Fully modular Terraform design
 - Variable-driven configuration
 - Microsoft naming conventions
 - Comprehensive tagging strategy
 
 ✅ **Testing**
+
 - Test VMs in each spoke (Ubuntu 22.04 with nginx)
 - Pre-configured connectivity test scripts
 - Ready for spoke-to-spoke communication testing
@@ -109,32 +130,34 @@ Traffic Flow:
 
 ### VNet Address Spaces
 
-| VNet         | CIDR Block     | Purpose                    | Status      |
-|--------------|----------------|----------------------------|-------------|
-| Hub          | 10.0.0.0/16    | Central connectivity hub   | ✅ Active   |
-| Development  | 10.1.0.0/16    | Development environment    | ✅ Active   |
-| Production   | 10.2.0.0/16    | Production workloads       | ✅ Active   |
-| Reserved     | 10.3-10.10.0.0/16 | Future expansion        | 📋 Available |
+| VNet        | CIDR Block        | Purpose                  | Status       |
+| ----------- | ----------------- | ------------------------ | ------------ |
+| Hub         | 10.0.0.0/16       | Central connectivity hub | ✅ Active    |
+| Development | 10.1.0.0/16       | Development environment  | ✅ Active    |
+| Production  | 10.2.0.0/16       | Production workloads     | ✅ Active    |
+| Reserved    | 10.3-10.10.0.0/16 | Future expansion         | 📋 Available |
 
 ### Hub VNet Subnets (10.0.0.0/16)
 
-| Subnet                | CIDR Block     | IPs   | Purpose                          |
-|-----------------------|----------------|-------|----------------------------------|
-| AzureFirewallSubnet   | 10.0.0.0/26    | 64    | Azure Firewall (required name)   |
-| AzureBastionSubnet    | 10.0.1.0/26    | 64    | Azure Bastion (required name)    |
-| Management            | 10.0.3.0/24    | 256   | Jumpboxes, DevOps agents         |
-| App Gateway           | 10.0.4.0/24    | 256   | Application Gateway              |
+| Subnet              | CIDR Block  | IPs | Purpose                        |
+| ------------------- | ----------- | --- | ------------------------------ |
+| AzureFirewallSubnet | 10.0.0.0/26 | 64  | Azure Firewall (required name) |
+| AzureBastionSubnet  | 10.0.1.0/26 | 64  | Azure Bastion (required name)  |
+| Management          | 10.0.3.0/24 | 256 | Jumpboxes, DevOps agents       |
+| App Gateway         | 10.0.4.0/24 | 256 | Application Gateway            |
 
 ### Spoke VNet Subnets
 
 Each spoke follows a consistent 3-tier pattern:
 
 **Development (10.1.0.0/16)**:
+
 - Workload: 10.1.1.0/24 (256 IPs) - Contains test VM
 - Data: 10.1.2.0/24 (256 IPs)
 - App: 10.1.3.0/24 (256 IPs)
 
 **Production (10.2.0.0/16)**:
+
 - Workload: 10.2.1.0/24 (256 IPs) - Contains test VM
 - Data: 10.2.2.0/24 (256 IPs)
 - App: 10.2.3.0/24 (256 IPs)
@@ -144,6 +167,7 @@ Each spoke follows a consistent 3-tier pattern:
 ### Zero Trust Architecture
 
 **Firewall Rules**:
+
 - ✅ Development → Full Azure services + Internet (GitHub, npm, Docker, etc.)
 - ✅ Development → Production: **HTTPS (443) ONLY** for API calls
 - ✅ Production → Essential Azure services only (whitelist approach)
@@ -151,11 +175,13 @@ Each spoke follows a consistent 3-tier pattern:
 - ❌ Production → General Internet: **BLOCKED** (essential services only)
 
 **Network Security Groups** (Fully Variable-Driven):
+
 - Management subnet: SSH/RDP from Bastion only
 - App Gateway subnet: Required ports for Gateway Manager + HTTPS from internet
 - All rules configurable via tfvars files
 
 **Route Tables** (Fully Variable-Driven):
+
 - All spoke traffic forced through hub firewall
 - Explicit routes for spoke-to-spoke communication
 - Routes prevent VNet peering bypass
@@ -242,6 +268,7 @@ azure-hub-spoke-networking-terraform/
 ## Prerequisites
 
 ### Required Tools
+
 - [Terraform](https://www.terraform.io/downloads.html) >= 1.0
 - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) >= 2.30
 - Azure subscription with Contributor permissions
@@ -251,11 +278,13 @@ azure-hub-spoke-networking-terraform/
 **1. SSH Key for Test VMs**
 
 Generate an SSH key pair:
+
 ```bash
 ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
 ```
 
 Get your public key:
+
 ```bash
 cat ~/.ssh/id_rsa.pub
 ```
@@ -281,6 +310,7 @@ az account set --subscription "<your-subscription-id>"
 ### 2. Add Your SSH Public Key
 
 Edit **vars/dev.tfvars** and **vars/prod.tfvars**, replace this line:
+
 ```hcl
 vm_admin_ssh_public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC... (REPLACE_WITH_YOUR_PUBLIC_KEY)"
 ```
@@ -297,6 +327,7 @@ terraform apply -var-file="../vars/prod.tfvars"
 ```
 
 This deploys:
+
 - Hub VNet (10.0.0.0/16)
 - Azure Firewall with Zero Trust policies
 - Azure Bastion for secure access
@@ -313,6 +344,7 @@ terraform apply -var-file="../vars/dev.tfvars"
 ```
 
 This deploys:
+
 - Development VNet (10.1.0.0/16)
 - 3 subnets (workload, data, app)
 - VNet peering to hub
@@ -329,6 +361,7 @@ terraform apply -var-file="../vars/prod.tfvars"
 ```
 
 This deploys:
+
 - Production VNet (10.2.0.0/16)
 - 3 subnets (workload, data, app)
 - VNet peering to hub
@@ -347,6 +380,7 @@ This deploys:
 ### Run Connectivity Tests
 
 **On Development VM**:
+
 ```bash
 # Run pre-configured test script
 ~/test-connectivity.sh
@@ -362,6 +396,7 @@ curl http://<prod-vm-private-ip>:80
 ```
 
 **On Production VM**:
+
 ```bash
 # Run pre-configured test script
 ~/test-connectivity.sh
@@ -375,38 +410,40 @@ curl http://<dev-vm-private-ip>:80 --max-time 5
 
 ### Expected Results
 
-| Test | Source | Destination | Expected Result |
-|------|--------|-------------|-----------------|
-| Internet | Dev VM | google.com:443 | ✅ SUCCESS |
-| Internet | Prod VM | google.com:443 | ✅ SUCCESS (restricted) |
-| Spoke→Spoke | Dev VM | Prod VM:80 | ✅ SUCCESS |
-| Spoke→Spoke | Prod VM | Dev VM:80 | ❌ BLOCKED |
+| Test        | Source  | Destination    | Expected Result         |
+| ----------- | ------- | -------------- | ----------------------- |
+| Internet    | Dev VM  | google.com:443 | ✅ SUCCESS              |
+| Internet    | Prod VM | google.com:443 | ✅ SUCCESS (restricted) |
+| Spoke→Spoke | Dev VM  | Prod VM:80     | ✅ SUCCESS              |
+| Spoke→Spoke | Prod VM | Dev VM:80      | ❌ BLOCKED              |
 
 ## Cost Considerations
 
 ### Monthly Cost Estimates (West Europe)
 
-| Component                | Cost/Month | Notes                           |
-|--------------------------|------------|---------------------------------|
-| Hub VNet                 | €0         | VNets are free                  |
-| Development VNet         | €0         | VNets are free                  |
-| Production VNet          | €0         | VNets are free                  |
-| VNet Peering (2x)        | ~€7-15     | Based on data transfer          |
-| Azure Firewall (Standard)| ~€800      | Can disable for dev (~€800 savings) |
-| Azure Bastion (Standard) | ~€130      | Required for VM access          |
-| Application Gateway v2   | ~€200      | Mandatory component             |
-| Test VMs (2x B2s)        | ~€60       | Can be stopped when not in use  |
-| **Total (all services)** | **~€1,200** | Full production setup          |
-| **Dev-optimized**        | **~€400**  | Firewall disabled in dev       |
+| Component                 | Cost/Month  | Notes                               |
+| ------------------------- | ----------- | ----------------------------------- |
+| Hub VNet                  | €0          | VNets are free                      |
+| Development VNet          | €0          | VNets are free                      |
+| Production VNet           | €0          | VNets are free                      |
+| VNet Peering (2x)         | ~€7-15      | Based on data transfer              |
+| Azure Firewall (Standard) | ~€800       | Can disable for dev (~€800 savings) |
+| Azure Bastion (Standard)  | ~€130       | Required for VM access              |
+| Application Gateway v2    | ~€200       | Mandatory component                 |
+| Test VMs (2x B2s)         | ~€60        | Can be stopped when not in use      |
+| **Total (all services)**  | **~€1,200** | Full production setup               |
+| **Dev-optimized**         | **~€400**   | Firewall disabled in dev            |
 
 ### Cost Optimization Tips
 
 1. **Development Environment**
+
    - Set `deploy_firewall = false` in dev.tfvars (saves ~€800/month)
    - Stop test VMs when not in use (saves ~€30/month)
    - Use Basic Bastion SKU instead of Standard (saves ~€20/month)
 
 2. **Production Environment**
+
    - Use Azure Firewall reservations (save 40-60%)
    - Monitor and optimize data transfer costs
    - Use autoscaling for Application Gateway
@@ -423,6 +460,7 @@ Following [Microsoft's recommended best practices](https://learn.microsoft.com/e
 **Format**: `{resource-type}-{workload}-{environment}-{region}-{instance}`
 
 **Examples**:
+
 - `vnet-hub-prod-westeurope-001`
 - `afw-hub-prod-westeurope-001`
 - `vm-test-dev-westeurope-001`
@@ -430,6 +468,7 @@ Following [Microsoft's recommended best practices](https://learn.microsoft.com/e
 ## References
 
 ### Microsoft Documentation
+
 - [Hub-Spoke Network Topology](https://learn.microsoft.com/en-us/azure/architecture/reference-architectures/hybrid-networking/hub-spoke)
 - [Azure Firewall](https://learn.microsoft.com/en-us/azure/firewall/)
 - [Azure Bastion](https://learn.microsoft.com/en-us/azure/bastion/)
@@ -437,6 +476,7 @@ Following [Microsoft's recommended best practices](https://learn.microsoft.com/e
 - [Azure Naming Conventions](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-naming)
 
 ### Terraform Documentation
+
 - [Azure Provider](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs)
 - [azurerm_virtual_network](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/virtual_network)
 - [azurerm_firewall](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/firewall)

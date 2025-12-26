@@ -1,21 +1,9 @@
 # Terragrunt Deployment Guide
 
-This repository uses **Terragrunt** to manage the Hub-Spoke infrastructure deployment with automatic dependency management and state orchestration.
-
-## ⚠️ IMPORTANT: Use Terragrunt Commands, NOT Terraform
-
-**DO NOT run `terraform init`, `terraform plan`, or `terraform apply`**
-
-Instead, use Terragrunt commands:
-- ❌ `terraform init` → ✅ `terragrunt init` or `terragrunt run-all init`
-- ❌ `terraform plan` → ✅ `terragrunt plan` or `terragrunt run-all plan`
-- ❌ `terraform apply` → ✅ `terragrunt apply` or `terragrunt run-all apply`
-
-Terragrunt wraps Terraform and adds automatic dependency management, remote state configuration, and DRY principles.
-
 ## Prerequisites
 
 1. **Install Terragrunt**:
+
    ```bash
    # Windows (using Chocolatey)
    choco install terragrunt
@@ -24,17 +12,20 @@ Terragrunt wraps Terraform and adds automatic dependency management, remote stat
    ```
 
 2. **Install Terraform** (>= 1.5.0):
+
    ```bash
    choco install terraform
    ```
 
 3. **Azure CLI** (authenticated):
+
    ```bash
    az login
    az account set --subscription "YOUR-SUBSCRIPTION-ID"
    ```
 
 4. **Create Azure Storage Account for Remote State** (one-time setup):
+
    ```bash
    # Create resource group for state
    az group create --name rg-terraform-state-dev-westeurope --location westeurope
@@ -78,6 +69,7 @@ azure-hub-spoke-networking-terraform/
 ### 1. Update Subscription ID
 
 Edit the `subscription_id` in each `terragrunt.hcl` file:
+
 - `hub/terragrunt.hcl`
 - `spoke-development/terragrunt.hcl`
 - `spoke-production/terragrunt.hcl`
@@ -87,11 +79,13 @@ Replace with your actual subscription ID (get it with `az account show --query i
 ### 2. Update SSH Public Key
 
 In spoke terragrunt.hcl files, update:
+
 ```hcl
 vm_admin_ssh_public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC..."
 ```
 
 Generate one with:
+
 ```bash
 ssh-keygen -t rsa -b 4096 -C "azure-hub-spoke-admin"
 cat ~/.ssh/id_rsa.pub
@@ -100,6 +94,7 @@ cat ~/.ssh/id_rsa.pub
 ### 3. Set Environment
 
 Edit `env.hcl` to set the environment:
+
 ```hcl
 locals {
   environment = "dev"  # or "prod"
@@ -119,6 +114,7 @@ terragrunt run-all apply   # Deploy hub + both spokes
 ```
 
 Terragrunt will:
+
 1. Deploy `hub/` first
 2. Wait for hub outputs
 3. Deploy `spoke-development/` and `spoke-production/` in parallel
@@ -127,6 +123,7 @@ Terragrunt will:
 ### Deploy Individual Components
 
 #### Hub Only
+
 ```bash
 cd hub
 terragrunt plan
@@ -134,6 +131,7 @@ terragrunt apply
 ```
 
 #### Development Spoke Only
+
 ```bash
 cd spoke-development
 terragrunt plan    # Will read hub outputs automatically
@@ -141,6 +139,7 @@ terragrunt apply
 ```
 
 #### Production Spoke Only
+
 ```bash
 cd spoke-production
 terragrunt plan
@@ -197,6 +196,7 @@ inputs = {
 ```
 
 This means:
+
 - ✅ Hub is **always deployed before spokes**
 - ✅ Spokes **automatically get hub outputs**
 - ✅ No manual copying of values needed
@@ -205,6 +205,7 @@ This means:
 ### Remote State Management
 
 Terragrunt automatically configures Azure Storage backend:
+
 - State files: `tfstate/hub/terraform.tfstate`, `tfstate/spoke-development/terraform.tfstate`, etc.
 - **State locking** enabled via Azure Storage
 - Each component has **isolated state**
@@ -212,6 +213,7 @@ Terragrunt automatically configures Azure Storage backend:
 ### Generated Files
 
 Terragrunt auto-generates in each module:
+
 - `backend.tf` - Remote state configuration
 - `provider.tf` - Azure provider configuration
 
@@ -256,29 +258,32 @@ terragrunt apply
 ### Troubleshooting
 
 **Clear Terragrunt cache:**
+
 ```bash
 find . -type d -name ".terragrunt-cache" -exec rm -rf {} +
 ```
 
 **Force refresh state:**
+
 ```bash
 terragrunt refresh
 ```
 
 **View dependency graph:**
+
 ```bash
 terragrunt graph-dependencies
 ```
 
 ## Comparison: Terragrunt vs Plain Terraform
 
-| Task | Plain Terraform | Terragrunt |
-|------|----------------|------------|
-| Deploy hub | `cd hub && terraform apply` | `cd hub && terragrunt apply` |
+| Task         | Plain Terraform                                               | Terragrunt                                 |
+| ------------ | ------------------------------------------------------------- | ------------------------------------------ |
+| Deploy hub   | `cd hub && terraform apply`                                   | `cd hub && terragrunt apply`               |
 | Deploy spoke | `cd spoke && terraform apply -var="hub_vnet_id=..."` (manual) | `cd spoke && terragrunt apply` (automatic) |
-| Deploy all | Run each separately, manually pass outputs | `terragrunt run-all apply` |
-| State files | 3 separate states (manual management) | 3 separate states (automatic management) |
-| Dependencies | Manual ordering | Automatic resolution |
+| Deploy all   | Run each separately, manually pass outputs                    | `terragrunt run-all apply`                 |
+| State files  | 3 separate states (manual management)                         | 3 separate states (automatic management)   |
+| Dependencies | Manual ordering                                               | Automatic resolution                       |
 
 ## Benefits of This Setup
 
