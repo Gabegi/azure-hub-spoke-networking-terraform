@@ -5,15 +5,13 @@ include "root" {
   path = find_in_parent_folders()
 }
 
-# Hub-specific inputs
-inputs = {
-  # Required variables (no defaults in variables.tf)
-  # subscription_id: Set via environment variable TF_VAR_subscription_id or pass via -var flag
-  environment = "dev"
-  location    = "westeurope"
+# Automatically pass the appropriate tfvars file to Terraform
+terraform {
+  extra_arguments "vars" {
+    commands = get_terraform_commands_that_need_vars()
 
-  # Optional: Override defaults from variables.tf if needed
-  # deploy_firewall = false
-  # bastion_sku     = "Basic"
-  # hub_address_space = "10.0.0.0/16"
+    arguments = [
+      "-var-file=${get_repo_root()}/vars/dev.tfvars"
+    ]
+  }
 }
