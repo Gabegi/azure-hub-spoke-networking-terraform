@@ -5,6 +5,11 @@ include "root" {
   path = find_in_parent_folders()
 }
 
+# Locals for mock values
+locals {
+  mock_subscription_id = "00000000-0000-0000-0000-000000000000"  # Dummy ID for validation
+}
+
 # Automatically pass dev.tfvars to Terraform
 terraform {
   extra_arguments "vars" {

@@ -5,6 +5,11 @@ include "root" {
   path = find_in_parent_folders()
 }
 
+# Locals for mock values
+locals {
+  mock_subscription_id = "00000000-0000-0000-0000-000000000000"  # Dummy ID for validation
+}
+
 # Automatically pass prod.tfvars to Terraform
 terraform {
   extra_arguments "vars" {
@@ -22,7 +27,7 @@ dependency "hub" {
 
   # Mock outputs for validation (when hub isn't deployed yet)
   mock_outputs = {
-    hub_vnet_id              = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mock-rg/providers/Microsoft.Network/virtualNetworks/mock-vnet"
+    hub_vnet_id              = "/subscriptions/${local.mock_subscription_id}/resourceGroups/mock-rg/providers/Microsoft.Network/virtualNetworks/mock-vnet"
     hub_vnet_name            = "vnet-hub-prod-westeurope-001"
     hub_resource_group_name  = "rg-hub-prod-westeurope-001"
     hub_firewall_private_ip  = "10.0.0.4"
