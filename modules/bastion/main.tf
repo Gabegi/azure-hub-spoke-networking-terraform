@@ -48,9 +48,6 @@ resource "azurerm_bastion_host" "bastion" {
   # Prevent accidental deletion in production
   lifecycle {
     prevent_destroy = false # Set to true for production
-
-    # Ignore changes to scale_units if SKU is Basic
-    ignore_changes = var.sku == "Basic" ? [scale_units] : []
   }
 
   depends_on = [

@@ -168,9 +168,6 @@ resource "azurerm_firewall" "firewall" {
   # Prevent accidental deletion
   lifecycle {
     prevent_destroy = false # Set to true for production
-
-    # Ignore changes to policy ID if managed separately
-    ignore_changes = var.ignore_policy_changes ? [firewall_policy_id] : []
   }
 
   depends_on = [
