@@ -139,13 +139,13 @@ output "app_gateway_nsg_id" {
 # ============================================================================
 
 output "log_analytics_workspace_id" {
-  value       = azurerm_log_analytics_workspace.hub.workspace_id
-  description = "Log Analytics workspace ID for diagnostics"
+  value       = azurerm_log_analytics_workspace.hub.id
+  description = "Log Analytics workspace resource ID for diagnostics"
 }
 
-output "log_analytics_workspace_resource_id" {
-  value       = azurerm_log_analytics_workspace.hub.id
-  description = "Log Analytics workspace resource ID"
+output "log_analytics_workspace_guid" {
+  value       = azurerm_log_analytics_workspace.hub.workspace_id
+  description = "Log Analytics workspace GUID"
 }
 
 output "storage_account_id" {

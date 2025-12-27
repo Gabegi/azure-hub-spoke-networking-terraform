@@ -56,7 +56,7 @@ module "bastion" {
 
   # Monitoring
   enable_diagnostic_settings = local.enable_diagnostics
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.hub.workspace_id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.hub.id
 
   tags = module.bastion_naming.tags
 

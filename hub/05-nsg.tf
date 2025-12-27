@@ -43,7 +43,7 @@ module "management_nsg" {
   # Traffic Analytics
   enable_traffic_analytics           = local.enable_traffic_analytics
   traffic_analytics_interval         = var.traffic_analytics_interval
-  log_analytics_workspace_id         = azurerm_log_analytics_workspace.hub.workspace_id
+  log_analytics_workspace_id         = azurerm_log_analytics_workspace.hub.id
   log_analytics_workspace_resource_id = azurerm_log_analytics_workspace.hub.id
 
   # Diagnostic Settings
@@ -95,7 +95,7 @@ module "app_gateway_nsg" {
   # Traffic Analytics
   enable_traffic_analytics           = local.enable_traffic_analytics
   traffic_analytics_interval         = var.traffic_analytics_interval
-  log_analytics_workspace_id         = azurerm_log_analytics_workspace.hub.workspace_id
+  log_analytics_workspace_id         = azurerm_log_analytics_workspace.hub.id
   log_analytics_workspace_resource_id = azurerm_log_analytics_workspace.hub.id
 
   # Diagnostic Settings

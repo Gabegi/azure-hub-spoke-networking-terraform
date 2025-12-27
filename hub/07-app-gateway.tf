@@ -79,6 +79,7 @@ module "app_gateway" {
       name                = "default-health-probe"
       protocol            = "Http"
       path                = "/"
+      host                = "127.0.0.1"
       interval            = 30
       timeout             = 30
       unhealthy_threshold = 3
@@ -107,7 +108,7 @@ module "app_gateway" {
 
   # Monitoring
   enable_diagnostic_settings = local.enable_diagnostics
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.hub.workspace_id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.hub.id
 
   tags = module.app_gateway_naming.tags
 
