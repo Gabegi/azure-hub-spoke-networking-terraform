@@ -154,7 +154,7 @@ resource "azurerm_application_gateway" "main" {
 
 # Diagnostic Settings
 resource "azurerm_monitor_diagnostic_setting" "app_gateway" {
-  count = var.enable_diagnostic_settings && var.log_analytics_workspace_id != null ? 1 : 0
+  count = var.enable_diagnostic_settings ? 1 : 0
 
   name                       = "diag-${var.app_gateway_name}"
   target_resource_id         = azurerm_application_gateway.main.id

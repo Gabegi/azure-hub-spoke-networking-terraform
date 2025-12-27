@@ -57,8 +57,8 @@ output "security_rules_summary" {
 # ============================================================================
 
 output "subnet_association_id" {
-  value       = var.subnet_id != null ? azurerm_subnet_network_security_group_association.nsg_subnet[0].id : null
-  description = "ID of the subnet-NSG association (if configured)"
+  value       = azurerm_subnet_network_security_group_association.nsg_subnet.id
+  description = "ID of the subnet-NSG association"
 }
 
 output "nic_association_ids" {
@@ -128,7 +128,7 @@ output "nsg_config" {
     location             = azurerm_network_security_group.nsg.location
     resource_group       = azurerm_network_security_group.nsg.resource_group_name
     rule_count           = length(azurerm_network_security_rule.rules)
-    subnet_associated    = var.subnet_id != null
+    subnet_associated    = true
     nic_count            = length(var.network_interface_ids)
     asg_count            = length(azurerm_application_security_group.asg)
     flow_logs_enabled    = var.enable_flow_logs

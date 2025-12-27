@@ -17,7 +17,7 @@ module "log_analytics_naming" {
 resource "azurerm_log_analytics_workspace" "hub" {
   name                = module.log_analytics_naming.name
   location            = var.location
-  resource_group_name = module.resource_group.resource_group_name
+  resource_group_name = module.rg_networking.rg_name
   sku                 = "PerGB2018"
   retention_in_days   = var.log_retention_days
 
@@ -43,7 +43,7 @@ resource "azurerm_storage_account" "flow_logs" {
   count = var.enable_flow_logs ? 1 : 0
 
   name                     = replace(module.storage_naming.name, "-", "") # Storage accounts can't have hyphens
-  resource_group_name      = module.resource_group.resource_group_name
+  resource_group_name      = module.rg_networking.rg_name
   location                 = var.location
   account_tier             = "Standard"
   account_replication_type = "LRS"
