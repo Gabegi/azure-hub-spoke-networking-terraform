@@ -58,11 +58,9 @@ resource "azurerm_network_security_rule" "rules" {
   ]
 }
 
-# Optional: Associate NSG with Subnet
+# Associate NSG with Subnet
 # Subnet-level NSG applies to all resources in the subnet
 resource "azurerm_subnet_network_security_group_association" "nsg_subnet" {
-  count = var.subnet_id != null ? 1 : 0
-
   subnet_id                 = var.subnet_id
   network_security_group_id = azurerm_network_security_group.nsg.id
 
