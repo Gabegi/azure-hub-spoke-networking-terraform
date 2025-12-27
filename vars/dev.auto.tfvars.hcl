@@ -8,7 +8,7 @@
 # General Configuration
 # ============================================================================
 
-subscription_id = "YOUR-SUBSCRIPTION-ID-HERE"  # Replace with your Azure subscription ID
+subscription_id = "xx"  # Replace with your Azure subscription ID
 
 environment = "dev"
 location    = "westeurope"
