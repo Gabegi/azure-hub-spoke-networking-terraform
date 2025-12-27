@@ -5,18 +5,18 @@ include "root" {
   path = find_in_parent_folders()
 }
 
-# Locals for mock values
+# Read dev tfvars for mock values
 locals {
-  mock_subscription_id = "00000000-0000-0000-0000-000000000000"  # Dummy ID for validation
+  vars = read_terragrunt_config("${get_repo_root()}/vars/dev.auto.tfvars.hcl")
 }
 
-# Automatically pass dev.tfvars to Terraform
+# Automatically pass dev.auto.tfvars.hcl to Terraform
 terraform {
   extra_arguments "vars" {
     commands = get_terraform_commands_that_need_vars()
 
     arguments = [
-      "-var-file=${get_repo_root()}/vars/dev.tfvars"
+      "-var-file=${get_repo_root()}/vars/dev.auto.tfvars.hcl"
     ]
   }
 }
@@ -26,8 +26,9 @@ dependency "hub" {
   config_path = "../hub"
 
   # Mock outputs for validation (when hub isn't deployed yet)
+  # hub_vnet_id from tfvars, rest hardcoded
   mock_outputs = {
-    hub_vnet_id              = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mock-rg/providers/Microsoft.Network/virtualNetworks/mock-vnet"
+    hub_vnet_id              = local.vars.locals.mock_hub_vnet_id
     hub_vnet_name            = "vnet-hub-dev-westeurope-001"
     hub_resource_group_name  = "rg-hub-dev-westeurope-001"
     hub_firewall_private_ip  = null
