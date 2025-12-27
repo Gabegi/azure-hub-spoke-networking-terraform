@@ -85,3 +85,4 @@ desktop.ini
 # Environment files
 .env
 .env.local
+hub/.terraform.lock.hcl

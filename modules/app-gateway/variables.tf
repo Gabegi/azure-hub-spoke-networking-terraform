@@ -55,7 +55,7 @@ variable "capacity" {
   default     = null
 
   validation {
-    condition     = var.capacity == null || (var.capacity >= 1 && var.capacity <= 125)
+    condition     = var.capacity == null ? true : (var.capacity >= 1 && var.capacity <= 125)
     error_message = "Capacity must be between 1 and 125, or null for autoscaling."
   }
 }

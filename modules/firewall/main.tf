@@ -157,13 +157,7 @@ resource "azurerm_firewall" "firewall" {
   # Recommendation: Use "Alert" initially, then switch to "Deny" after testing
   threat_intel_mode = var.threat_intel_mode
 
-  # DNS configuration (enables DNS proxy for spoke VMs)
-  dynamic "dns_servers" {
-    for_each = length(var.dns_servers) > 0 ? [1] : []
-    content {
-      servers = var.dns_servers
-    }
-  }
+  # DNS configuration is handled via Firewall Policy (not directly on firewall resource)
 
   # Prevent accidental deletion
   lifecycle {
