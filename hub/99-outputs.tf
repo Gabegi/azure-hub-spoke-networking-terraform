@@ -135,6 +135,25 @@ output "app_gateway_nsg_id" {
 }
 
 # ============================================================================
+# Monitoring Outputs
+# ============================================================================
+
+output "log_analytics_workspace_id" {
+  value       = azurerm_log_analytics_workspace.hub.workspace_id
+  description = "Log Analytics workspace ID for diagnostics"
+}
+
+output "log_analytics_workspace_resource_id" {
+  value       = azurerm_log_analytics_workspace.hub.id
+  description = "Log Analytics workspace resource ID"
+}
+
+output "storage_account_id" {
+  value       = var.enable_flow_logs ? azurerm_storage_account.flow_logs[0].id : null
+  description = "Storage account ID for flow logs"
+}
+
+# ============================================================================
 # Summary Output
 # ============================================================================
 

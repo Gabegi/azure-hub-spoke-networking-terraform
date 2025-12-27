@@ -107,11 +107,12 @@ module "app_gateway" {
 
   # Monitoring
   enable_diagnostic_settings = local.enable_diagnostics
-  log_analytics_workspace_id = var.log_analytics_workspace_id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.hub.workspace_id
 
   tags = module.app_gateway_naming.tags
 
   depends_on = [
-    module.app_gateway_subnet
+    module.app_gateway_subnet,
+    azurerm_log_analytics_workspace.hub
   ]
 }

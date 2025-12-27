@@ -262,25 +262,3 @@ variable "log_retention_days" {
   description = "Log retention in days"
   default     = 90
 }
-
-# ============================================================================
-# External References
-# ============================================================================
-
-variable "log_analytics_workspace_id" {
-  type        = string
-  description = "Log Analytics workspace ID"
-  default     = null
-}
-
-variable "log_analytics_workspace_resource_id" {
-  type        = string
-  description = "Log Analytics workspace resource ID"
-  default     = null
-}
-
-variable "storage_account_id" {
-  type        = string
-  description = "Storage account ID for flow logs"
-  default     = null
-}

@@ -72,11 +72,12 @@ module "firewall" {
 
   # Monitoring
   enable_diagnostic_settings = local.enable_diagnostics
-  log_analytics_workspace_id = var.log_analytics_workspace_id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.hub.workspace_id
 
   tags = module.firewall_naming.tags
 
   depends_on = [
-    module.firewall_subnet
+    module.firewall_subnet,
+    azurerm_log_analytics_workspace.hub
   ]
 }
