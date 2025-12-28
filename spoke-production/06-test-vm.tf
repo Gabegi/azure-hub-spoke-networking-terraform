@@ -41,7 +41,7 @@ module "test_vm" {
   resource_group_name = module.rg_spoke.rg_name
   subnet_id           = module.workload_subnet[0].subnet_id
 
-  vm_size                = "Standard_B2s"
+  vm_size                = "Standard_DS1_v2"
   admin_username         = "azureuser"
   admin_ssh_public_key   = var.vm_admin_ssh_public_key
 
