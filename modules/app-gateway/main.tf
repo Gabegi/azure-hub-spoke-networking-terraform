@@ -145,6 +145,12 @@ resource "azurerm_application_gateway" "main" {
     }
   }
 
+  # SSL Policy - Use modern TLS version
+  ssl_policy {
+    policy_type = "Predefined"
+    policy_name = "AppGwSslPolicy20220101"
+  }
+
   tags = var.tags
 
   lifecycle {
