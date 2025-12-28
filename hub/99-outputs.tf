@@ -102,25 +102,6 @@ output "bastion_fqdn" {
 }
 
 # ============================================================================
-# Application Gateway Outputs
-# ============================================================================
-
-output "app_gateway_id" {
-  value       = module.app_gateway.app_gateway_id
-  description = "Application Gateway ID"
-}
-
-output "app_gateway_name" {
-  value       = module.app_gateway.app_gateway_name
-  description = "Application Gateway name"
-}
-
-output "app_gateway_public_ip" {
-  value       = module.app_gateway.public_ip_address
-  description = "Application Gateway public IP address"
-}
-
-# ============================================================================
 # NSG Outputs
 # ============================================================================
 
@@ -130,7 +111,7 @@ output "management_nsg_id" {
 }
 
 output "app_gateway_nsg_id" {
-  value       = module.app_gateway_nsg.nsg_id
+  value       = local.deploy_app_gateway ? module.app_gateway_nsg[0].nsg_id : null
   description = "Application Gateway NSG ID"
 }
 

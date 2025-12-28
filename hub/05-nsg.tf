@@ -74,6 +74,7 @@ module "app_gateway_nsg_naming" {
 }
 
 module "app_gateway_nsg" {
+  count  = local.deploy_app_gateway ? 1 : 0
   source = "../modules/nsg"
 
   nsg_name            = module.app_gateway_nsg_naming.name

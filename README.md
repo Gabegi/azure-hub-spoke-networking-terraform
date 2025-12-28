@@ -53,6 +53,10 @@ When you run terragrunt init, it:
 3. Runs terraform init for you automatically
 4. Configures remote state
 
+# Destroy everything
+
+From root folder run terragrunt run-all destroy
+
 ## Table of Contents
 
 - [Overview](#overview)

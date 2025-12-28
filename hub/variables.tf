@@ -59,6 +59,12 @@ variable "deploy_bastion" {
   default     = true
 }
 
+variable "deploy_app_gateway" {
+  type        = bool
+  description = "Deploy Application Gateway"
+  default     = true
+}
+
 variable "deploy_management_subnet" {
   type        = bool
   description = "Deploy management subnet"

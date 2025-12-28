@@ -32,6 +32,7 @@ module "app_gateway_pip_naming" {
 # ============================================================================
 
 module "app_gateway" {
+  count  = local.deploy_app_gateway ? 1 : 0
   source = "../modules/app-gateway"
 
   app_gateway_name = module.app_gateway_naming.name
