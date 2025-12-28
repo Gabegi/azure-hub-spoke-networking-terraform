@@ -23,8 +23,8 @@ dependency "hub" {
 
 # Hub Integration - Pass hub outputs to Terraform
 inputs = {
-  hub_vnet_id              = dependency.hub.outputs.hub_vnet_id
-  hub_vnet_name            = dependency.hub.outputs.hub_vnet_name
-  hub_resource_group_name  = dependency.hub.outputs.hub_resource_group_name
-  hub_firewall_private_ip  = dependency.hub.outputs.hub_firewall_private_ip
+  hub_vnet_id              = dependency.hub.outputs.vnet_id
+  hub_vnet_name            = dependency.hub.outputs.vnet_name
+  hub_resource_group_name  = dependency.hub.outputs.resource_group_name
+  hub_firewall_private_ip  = try(dependency.hub.outputs.firewall_private_ip, null)
 }

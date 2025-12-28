@@ -86,3 +86,4 @@ desktop.ini
 .env
 .env.local
 hub/.terraform.lock.hcl
+spoke-development/.terraform.lock.hcl
