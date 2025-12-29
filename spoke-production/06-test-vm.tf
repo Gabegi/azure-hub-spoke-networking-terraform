@@ -28,26 +28,8 @@ module "test_vm_nic_naming" {
 }
 
 # ============================================================================
-# Test VM with Public IP (TESTING ONLY - REMOVE IN PRODUCTION!)
+# Test VM
 # ============================================================================
-
-# WARNING: Public IP is for TESTING ONLY!
-# Remove this resource and public_ip_address_id from NIC for production deployment
-resource "azurerm_public_ip" "test_vm" {
-  count               = local.deploy_workload_subnet ? 1 : 0
-  name                = "pip-test-production-westeurope-001"
-  location            = var.location
-  resource_group_name = module.rg_spoke.rg_name
-  allocation_method   = "Static"
-  sku                 = "Standard"
-
-  tags = merge(
-    var.tags,
-    {
-      Purpose = "TESTING ONLY - Remove for production"
-    }
-  )
-}
 
 module "test_vm" {
   count  = local.deploy_workload_subnet ? 1 : 0
@@ -58,9 +40,6 @@ module "test_vm" {
   location            = var.location
   resource_group_name = module.rg_spoke.rg_name
   subnet_id           = module.workload_subnet[0].subnet_id
-
-  # WARNING: Public IP for TESTING ONLY!
-  public_ip_address_id = azurerm_public_ip.test_vm[0].id
 
   vm_size                = "Standard_D2s_v3"
   admin_username         = "azureuser"

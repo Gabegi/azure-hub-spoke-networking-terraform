@@ -52,20 +52,8 @@ module "workload_nsg" {
 
   security_rules = [
     {
-      name                       = "AllowSSHFromInternet"
-      priority                   = 100
-      direction                  = "Inbound"
-      access                     = "Allow"
-      protocol                   = "Tcp"
-      source_port_range          = "*"
-      destination_port_range     = "22"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "TESTING ONLY - Allow SSH from Internet - REMOVE IN PRODUCTION!"
-    },
-    {
       name                       = "AllowSSHFromBastion"
-      priority                   = 101
+      priority                   = 100
       direction                  = "Inbound"
       access                     = "Allow"
       protocol                   = "Tcp"
