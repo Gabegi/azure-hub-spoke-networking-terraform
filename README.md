@@ -14,6 +14,13 @@ Instead, use Terragrunt commands:
 - ❌ `terraform plan` → ✅ `terragrunt plan` or `terragrunt run-all plan`
 - ❌ `terraform apply` → ✅ `terragrunt apply` or `terragrunt run-all apply`
 
+In our case, we only need two
+Deploy all (hub first, then spokes automatically)
+terragrunt run-all apply
+
+Destroy all (spokes first, then hub automatically)
+terragrunt run-all destroy
+
 Terragrunt wraps Terraform and adds automatic dependency management, remote state configuration, and DRY principles.
 
 with Terragrunt, you don't run terraform init at all. You use Terragrunt commands instead.
