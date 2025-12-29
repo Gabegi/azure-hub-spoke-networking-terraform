@@ -20,7 +20,8 @@ variable "resource_type" {
       "peer",    # VNet Peering
       "vm",      # Virtual Machine
       "nic",     # Network Interface
-      "agw"      # Application Gateway
+      "agw",     # Application Gateway
+      "aci"      # Azure Container Instance
     ], var.resource_type)
     error_message = "Must use approved Microsoft abbreviations"
   }

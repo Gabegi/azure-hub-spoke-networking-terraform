@@ -7,11 +7,13 @@ locals {
   workload_subnet     = "10.2.0.0/24"
   data_subnet         = "10.2.1.0/24"
   app_subnet          = "10.2.2.0/24"
+  aci_subnet          = "10.2.3.0/24"
 
   # Feature Flags
   deploy_workload_subnet = var.deploy_workload_subnet
   deploy_data_subnet     = var.deploy_data_subnet
   deploy_app_subnet      = var.deploy_app_subnet
+  deploy_aci_subnet      = var.deploy_aci_subnet
 
   # Monitoring Configuration
   enable_diagnostics        = var.enable_diagnostics

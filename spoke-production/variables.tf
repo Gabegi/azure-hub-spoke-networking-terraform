@@ -66,6 +66,12 @@ variable "deploy_app_subnet" {
   default     = true
 }
 
+variable "deploy_aci_subnet" {
+  type        = bool
+  description = "Deploy Azure Container Instance subnet"
+  default     = false
+}
+
 # ============================================================================
 # Hub Integration
 # ============================================================================
