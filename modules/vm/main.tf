@@ -14,6 +14,8 @@ resource "azurerm_network_interface" "vm" {
     name                          = "internal"
     subnet_id                     = var.subnet_id
     private_ip_address_allocation = "Dynamic"
+    # WARNING: Public IP for TESTING ONLY!
+    public_ip_address_id          = var.public_ip_address_id
   }
 
   tags = var.tags

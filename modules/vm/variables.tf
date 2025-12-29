@@ -25,6 +25,12 @@ variable "subnet_id" {
   description = "Subnet ID for the network interface"
 }
 
+variable "public_ip_address_id" {
+  type        = string
+  description = "Public IP address ID (TESTING ONLY - should be null for production)"
+  default     = null
+}
+
 variable "vm_size" {
   type        = string
   description = "VM size"

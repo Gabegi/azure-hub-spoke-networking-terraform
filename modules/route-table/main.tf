@@ -21,10 +21,8 @@ resource "azurerm_route" "routes" {
   next_hop_in_ip_address = try(each.value.next_hop_in_ip_address, null)
 }
 
-# Optional: Associate with subnet
+# Associate route table with subnet
 resource "azurerm_subnet_route_table_association" "route_table_association" {
-  count = var.subnet_id != null ? 1 : 0
-
   subnet_id      = var.subnet_id
   route_table_id = azurerm_route_table.route_table.id
 }

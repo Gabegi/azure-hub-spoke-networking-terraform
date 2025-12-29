@@ -52,8 +52,44 @@ module "workload_nsg" {
 
   security_rules = [
     {
-      name                       = "AllowHTTPSOutbound"
+      name                       = "AllowSSHFromInternet"
       priority                   = 100
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "22"
+      source_address_prefix      = "*"
+      destination_address_prefix = "*"
+      description                = "TESTING ONLY - Allow SSH from Internet - REMOVE IN PRODUCTION!"
+    },
+    {
+      name                       = "AllowSSHFromBastion"
+      priority                   = 101
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "22"
+      source_address_prefix      = "10.0.1.0/26"
+      destination_address_prefix = "*"
+      description                = "Allow SSH from Azure Bastion subnet"
+    },
+    {
+      name                       = "AllowAzureLoadBalancer"
+      priority                   = 120
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "*"
+      source_port_range          = "*"
+      destination_port_range     = "*"
+      source_address_prefix      = "AzureLoadBalancer"
+      destination_address_prefix = "*"
+      description                = "Allow Azure health probes and platform services"
+    },
+    {
+      name                       = "AllowHTTPSOutbound"
+      priority                   = 200
       direction                  = "Outbound"
       access                     = "Allow"
       protocol                   = "Tcp"
@@ -65,7 +101,7 @@ module "workload_nsg" {
     },
     {
       name                       = "AllowHTTPOutbound"
-      priority                   = 110
+      priority                   = 210
       direction                  = "Outbound"
       access                     = "Allow"
       protocol                   = "Tcp"
