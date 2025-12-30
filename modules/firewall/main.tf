@@ -48,10 +48,13 @@ resource "azurerm_firewall_policy" "policy" {
   threat_intelligence_mode = var.threat_intel_mode
   tags                     = var.tags
 
-  # DNS configuration
-  dns {
-    proxy_enabled = var.dns_proxy_enabled
-    servers       = var.dns_servers
+  # DNS configuration (Standard/Premium SKU only - not available in Basic)
+  dynamic "dns" {
+    for_each = var.sku_tier != "Basic" ? [1] : []
+    content {
+      proxy_enabled = var.dns_proxy_enabled
+      servers       = var.dns_servers
+    }
   }
 
   # Threat Intelligence allowlist/denylist

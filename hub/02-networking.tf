@@ -60,6 +60,19 @@ module "firewall_subnet" {
   depends_on = [module.hub_vnet]
 }
 
+# AzureFirewallManagementSubnet (REQUIRED for Basic SKU - exact name)
+module "firewall_management_subnet" {
+  count  = local.deploy_firewall ? 1 : 0
+  source = "../modules/subnet"
+
+  subnet_name          = "AzureFirewallManagementSubnet"
+  resource_group_name  = module.rg_networking.rg_name
+  virtual_network_name = module.hub_vnet.vnet_name
+  address_prefixes     = [local.firewall_management_subnet]
+
+  depends_on = [module.hub_vnet]
+}
+
 # AzureBastionSubnet (REQUIRED - exact name)
 module "bastion_subnet" {
   source = "../modules/subnet"
