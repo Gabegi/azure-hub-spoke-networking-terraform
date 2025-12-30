@@ -1,16 +1,57 @@
 # modules/firewall/main.tf
 # Azure Firewall module - centralized network security and traffic inspection for hub-spoke architecture
 
+# ============================================================================
+# Internal Naming Module
+# ============================================================================
+
+module "firewall_naming" {
+  source = "../naming"
+
+  resource_type = var.resource_type
+  workload      = var.workload
+  environment   = var.environment
+  location      = var.location
+  instance      = var.instance
+  common_tags   = var.common_tags
+}
+
+module "firewall_pip_naming" {
+  source = "../naming"
+
+  resource_type = "pip"
+  workload      = "firewall"
+  environment   = var.environment
+  location      = var.location
+  instance      = var.instance
+  common_tags   = var.common_tags
+}
+
+module "firewall_policy_naming" {
+  source = "../naming"
+
+  resource_type = "afwp"
+  workload      = var.workload
+  environment   = var.environment
+  location      = var.location
+  instance      = var.instance
+  common_tags   = var.common_tags
+}
+
+# ============================================================================
+# Azure Firewall Resources
+# ============================================================================
+
 # Public IP for Azure Firewall (required)
 # Must be Static and Standard SKU for Firewall compatibility
 resource "azurerm_public_ip" "firewall" {
-  name                = var.public_ip_name
+  name                = module.firewall_pip_naming.name
   location            = var.location
   resource_group_name = var.resource_group_name
   allocation_method   = "Static"              # Required for Firewall
   sku                 = "Standard"            # Required for Firewall
   zones               = var.availability_zones # Zone redundancy for HA (1, 2, 3)
-  tags                = var.tags
+  tags                = module.firewall_pip_naming.tags
 
   # Prevent accidental deletion in production
   lifecycle {
@@ -21,15 +62,15 @@ resource "azurerm_public_ip" "firewall" {
 # Optional: Additional Public IP addresses for SNAT
 # Helps prevent SNAT port exhaustion with high traffic volumes
 resource "azurerm_public_ip" "firewall_management" {
-  count = var.firewall_management_ip_name != null ? 1 : 0
+  count = var.management_subnet_id != null ? 1 : 0
 
-  name                = var.firewall_management_ip_name
+  name                = "pip-firewall-mgmt-${var.environment}-${var.location}-${var.instance}"
   location            = var.location
   resource_group_name = var.resource_group_name
   allocation_method   = "Static"
   sku                 = "Standard"
   zones               = var.availability_zones
-  tags                = var.tags
+  tags                = module.firewall_pip_naming.tags
 
   lifecycle {
     prevent_destroy = false
@@ -41,12 +82,12 @@ resource "azurerm_public_ip" "firewall_management" {
 resource "azurerm_firewall_policy" "policy" {
   count = var.create_firewall_policy ? 1 : 0
 
-  name                     = var.firewall_policy_name != null ? var.firewall_policy_name : "${var.firewall_name}-policy"
+  name                     = module.firewall_policy_naming.name
   location                 = var.location
   resource_group_name      = var.resource_group_name
   sku                      = var.sku_tier
   threat_intelligence_mode = var.threat_intel_mode
-  tags                     = var.tags
+  tags                     = module.firewall_policy_naming.tags
 
   # DNS configuration (Standard/Premium SKU only - not available in Basic)
   dynamic "dns" {
@@ -121,7 +162,7 @@ resource "azurerm_firewall_policy" "policy" {
 # Azure Firewall
 # Provides stateful firewall, SNAT/DNAT, threat intelligence, and application/network filtering
 resource "azurerm_firewall" "firewall" {
-  name                = var.firewall_name
+  name                = module.firewall_naming.name
   location            = var.location
   resource_group_name = var.resource_group_name
 
@@ -137,7 +178,7 @@ resource "azurerm_firewall" "firewall" {
   # Zone redundancy for 99.99% SLA (requires 3 zones)
   zones = var.availability_zones
 
-  tags = var.tags
+  tags = module.firewall_naming.tags
 
   # Primary IP configuration - connects Firewall to AzureFirewallSubnet
   ip_configuration {
@@ -177,7 +218,7 @@ resource "azurerm_firewall" "firewall" {
 resource "azurerm_monitor_diagnostic_setting" "firewall" {
   count = var.enable_diagnostic_settings ? 1 : 0
 
-  name                       = "${var.firewall_name}-diag"
+  name                       = "${module.firewall_naming.name}-diag"
   target_resource_id         = azurerm_firewall.firewall.id
   log_analytics_workspace_id = var.log_analytics_workspace_id
 
@@ -216,10 +257,10 @@ resource "azurerm_monitor_diagnostic_setting" "firewall" {
 resource "azurerm_public_ip_prefix" "firewall" {
   count = var.create_public_ip_prefix ? 1 : 0
 
-  name                = "${var.firewall_name}-pip-prefix"
+  name                = "${module.firewall_naming.name}-pip-prefix"
   location            = var.location
   resource_group_name = var.resource_group_name
   prefix_length       = var.public_ip_prefix_length # /28 = 16 IPs, /30 = 4 IPs, /31 = 2 IPs
   zones               = var.availability_zones
-  tags                = var.tags
+  tags                = module.firewall_naming.tags
 }

@@ -1,9 +1,40 @@
 # modules/vnet/variables.tf
 
-variable "vnet_name" {
+# ============================================================================
+# Naming Variables (for internal naming module)
+# ============================================================================
+
+variable "resource_type" {
   type        = string
-  description = "Name of the virtual network"
+  description = "Azure resource type abbreviation (e.g., 'vnet')"
+  default     = "vnet"
 }
+
+variable "workload" {
+  type        = string
+  description = "Workload or application name (e.g., 'hub', 'spoke', 'app')"
+}
+
+variable "environment" {
+  type        = string
+  description = "Environment name (e.g., 'dev', 'prod', 'staging')"
+}
+
+variable "instance" {
+  type        = string
+  description = "Instance number (e.g., '001', '002')"
+  default     = "001"
+}
+
+variable "common_tags" {
+  type        = map(string)
+  description = "Common tags to merge with module-generated tags"
+  default     = {}
+}
+
+# ============================================================================
+# Required Variables
+# ============================================================================
 
 variable "location" {
   type        = string
@@ -35,10 +66,4 @@ variable "ddos_protection_plan_id" {
   type        = string
   description = "ID of DDoS protection plan to associate (optional)"
   default     = null
-}
-
-variable "tags" {
-  type        = map(string)
-  description = "Tags to apply to the VNet"
-  default     = {}
 }

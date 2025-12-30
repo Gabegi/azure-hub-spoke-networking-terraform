@@ -2,43 +2,6 @@
 # Azure Firewall configuration
 
 # ============================================================================
-# Naming Modules
-# ============================================================================
-
-module "firewall_naming" {
-  source = "../modules/naming"
-
-  resource_type = "afw"
-  workload      = "hub"
-  environment   = var.environment
-  location      = var.location
-  instance      = "001"
-  common_tags   = var.tags
-}
-
-module "firewall_pip_naming" {
-  source = "../modules/naming"
-
-  resource_type = "pip"
-  workload      = "firewall"
-  environment   = var.environment
-  location      = var.location
-  instance      = "001"
-  common_tags   = var.tags
-}
-
-module "firewall_policy_naming" {
-  source = "../modules/naming"
-
-  resource_type = "afwp"
-  workload      = "hub"
-  environment   = var.environment
-  location      = var.location
-  instance      = "001"
-  common_tags   = var.tags
-}
-
-# ============================================================================
 # Azure Firewall
 # ============================================================================
 
@@ -46,15 +9,20 @@ module "firewall" {
   count  = local.deploy_firewall ? 1 : 0
   source = "../modules/firewall"
 
-  firewall_name       = module.firewall_naming.name
-  public_ip_name      = module.firewall_pip_naming.name
-  location            = var.location
+  # Naming (module handles naming internally)
+  resource_type = "afw"
+  workload      = "hub"
+  environment   = var.environment
+  location      = var.location
+  instance      = "001"
+  common_tags   = var.tags
+
+  # Network Configuration
   resource_group_name = module.rg_networking.rg_name
   subnet_id           = module.firewall_subnet.subnet_id
 
   # Management IP Configuration (required for Basic SKU)
-  firewall_management_ip_name = var.firewall_sku_tier == "Basic" ? "pip-firewall-mgmt-${var.environment}-${var.location}-001" : null
-  management_subnet_id        = var.firewall_sku_tier == "Basic" ? module.firewall_management_subnet[0].subnet_id : null
+  management_subnet_id = var.firewall_sku_tier == "Basic" ? module.firewall_management_subnet[0].subnet_id : null
 
   # SKU Configuration
   sku_name = "AZFW_VNet"
@@ -62,13 +30,12 @@ module "firewall" {
 
   # Firewall Policy
   create_firewall_policy = true
-  firewall_policy_name   = module.firewall_policy_naming.name
 
   # Threat Intelligence
   threat_intel_mode = var.firewall_threat_intel_mode
 
-  # DNS Configuration
-  dns_proxy_enabled = true
+  # DNS Configuration (not available in Basic SKU)
+  dns_proxy_enabled = var.firewall_sku_tier != "Basic" ? true : false
   dns_servers       = var.firewall_dns_servers
 
   # High Availability
@@ -77,8 +44,6 @@ module "firewall" {
   # Monitoring
   enable_diagnostic_settings = local.enable_diagnostics
   log_analytics_workspace_id = azurerm_log_analytics_workspace.hub.id
-
-  tags = module.firewall_naming.tags
 
   depends_on = [
     module.firewall_subnet,
