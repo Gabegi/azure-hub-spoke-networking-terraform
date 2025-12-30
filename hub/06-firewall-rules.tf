@@ -326,25 +326,22 @@ resource "azurerm_firewall_policy_rule_collection_group" "hub_rules" {
     }
 
     # Production → Limited External HTTPS (Whitelist approach)
-    rule {
-      name             = "ProductionToApprovedDomains"
-      source_addresses = ["10.2.0.0/16"]
-
-      protocols {
-        type = "Https"
-        port = 443
-      }
-
-      destination_fqdns = [
-        # Add your approved production domains here
-        # Example: Payment gateways, partner APIs, etc.
-        # "api.stripe.com",
-        # "api.sendgrid.com",
-        # "api.twilio.com"
-
-        # Keep list minimal - add only as needed
-      ]
-    }
+    # Uncomment and add approved domains when needed:
+    # rule {
+    #   name             = "ProductionToApprovedDomains"
+    #   source_addresses = ["10.2.0.0/16"]
+    #
+    #   protocols {
+    #     type = "Https"
+    #     port = 443
+    #   }
+    #
+    #   destination_fqdns = [
+    #     # Example: Payment gateways, partner APIs
+    #     # "api.stripe.com",
+    #     # "api.sendgrid.com"
+    #   ]
+    # }
 
     # ❌ REMOVED: GitHub access (production should NOT pull code directly)
     # ❌ REMOVED: General internet access (production locked down)
