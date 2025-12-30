@@ -2,128 +2,94 @@
 # Development Spoke VNet and Subnets
 
 # ============================================================================
-# Naming Modules
-# ============================================================================
-
-module "spoke_vnet_naming" {
-  source = "../modules/naming"
-
-  resource_type = "vnet"
-  workload      = "spoke-development"
-  environment   = var.environment
-  location      = var.location
-  instance      = "001"
-  common_tags   = var.tags
-}
-
-module "workload_subnet_naming" {
-  source = "../modules/naming"
-
-  resource_type = "snet"
-  workload      = "workload"
-  environment   = var.environment
-  location      = var.location
-  instance      = "001"
-  common_tags   = var.tags
-}
-
-module "data_subnet_naming" {
-  source = "../modules/naming"
-
-  resource_type = "snet"
-  workload      = "data"
-  environment   = var.environment
-  location      = var.location
-  instance      = "001"
-  common_tags   = var.tags
-}
-
-module "app_subnet_naming" {
-  source = "../modules/naming"
-
-  resource_type = "snet"
-  workload      = "app"
-  environment   = var.environment
-  location      = var.location
-  instance      = "001"
-  common_tags   = var.tags
-}
-
-# ============================================================================
 # Spoke Virtual Network
 # ============================================================================
 
 module "spoke_vnet" {
   source = "../modules/vnet"
 
-  vnet_name           = module.spoke_vnet_naming.name
-  location            = var.location
-  resource_group_name = module.rg_spoke.rg_name
+  # Naming (module handles naming internally)
+  resource_type = "vnet"
+  workload      = "spoke-development"
+  environment   = var.environment
+  location      = var.location
+  instance      = "001"
+  common_tags   = var.tags
+
+  # Network Configuration
+  resource_group_name = module.rg_networking.rg_name
   address_space       = [local.spoke_address_space]
 
-  tags = module.spoke_vnet_naming.tags
-
-  depends_on = [module.rg_spoke]
+  depends_on = [module.rg_networking]
 }
 
 # ============================================================================
 # Spoke Subnets
 # ============================================================================
 
-# Workload Subnet (General purpose compute resources)
+# Workload Subnet (for general workloads)
 module "workload_subnet" {
   count  = local.deploy_workload_subnet ? 1 : 0
   source = "../modules/subnet"
 
-  subnet_name          = module.workload_subnet_naming.name
-  resource_group_name  = module.rg_spoke.rg_name
+  subnet_name          = "snet-workload-${var.environment}-${var.location}-001"
+  resource_group_name  = module.rg_networking.rg_name
   virtual_network_name = module.spoke_vnet.vnet_name
   address_prefixes     = [local.workload_subnet]
 
-  service_endpoints = [
-    "Microsoft.Storage",
-    "Microsoft.KeyVault",
-    "Microsoft.Sql",
-    "Microsoft.ContainerRegistry"
-  ]
+  service_endpoints = var.workload_subnet_service_endpoints
 
   depends_on = [module.spoke_vnet]
 }
 
-# Data Subnet (Databases, data services)
+# Data Subnet (for databases, storage)
 module "data_subnet" {
   count  = local.deploy_data_subnet ? 1 : 0
   source = "../modules/subnet"
 
-  subnet_name          = module.data_subnet_naming.name
-  resource_group_name  = module.rg_spoke.rg_name
+  subnet_name          = "snet-data-${var.environment}-${var.location}-001"
+  resource_group_name  = module.rg_networking.rg_name
   virtual_network_name = module.spoke_vnet.vnet_name
   address_prefixes     = [local.data_subnet]
 
-  service_endpoints = [
-    "Microsoft.Storage",
-    "Microsoft.KeyVault",
-    "Microsoft.Sql"
-  ]
+  service_endpoints = var.data_subnet_service_endpoints
 
   depends_on = [module.spoke_vnet]
 }
 
-# Application Subnet (App services, web apps)
+# App Subnet (for application tier)
 module "app_subnet" {
   count  = local.deploy_app_subnet ? 1 : 0
   source = "../modules/subnet"
 
-  subnet_name          = module.app_subnet_naming.name
-  resource_group_name  = module.rg_spoke.rg_name
+  subnet_name          = "snet-app-${var.environment}-${var.location}-001"
+  resource_group_name  = module.rg_networking.rg_name
   virtual_network_name = module.spoke_vnet.vnet_name
   address_prefixes     = [local.app_subnet]
 
-  service_endpoints = [
-    "Microsoft.Storage",
-    "Microsoft.KeyVault",
-    "Microsoft.Web"
-  ]
+  service_endpoints = var.app_subnet_service_endpoints
+
+  depends_on = [module.spoke_vnet]
+}
+
+# ACI Subnet (for Azure Container Instances)
+module "aci_subnet" {
+  count  = local.deploy_aci_subnet ? 1 : 0
+  source = "../modules/subnet"
+
+  subnet_name          = "snet-aci-${var.environment}-${var.location}-001"
+  resource_group_name  = module.rg_networking.rg_name
+  virtual_network_name = module.spoke_vnet.vnet_name
+  address_prefixes     = [local.aci_subnet]
+
+  # Delegate subnet to Azure Container Instances
+  delegation = {
+    name         = "aci-delegation"
+    service_name = "Microsoft.ContainerInstance/containerGroups"
+    actions = [
+      "Microsoft.Network/virtualNetworks/subnets/action"
+    ]
+  }
 
   depends_on = [module.spoke_vnet]
 }

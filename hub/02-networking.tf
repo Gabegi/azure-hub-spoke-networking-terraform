@@ -2,44 +2,23 @@
 # Hub VNet and Subnets
 
 # ============================================================================
-# Naming Modules
-# ============================================================================
-
-module "hub_vnet_naming" {
-  source = "../modules/naming"
-
-  resource_type = "vnet"
-  workload      = "hub"
-  environment   = var.environment
-  location      = var.location
-  instance      = "001"
-  common_tags   = var.tags
-}
-
-module "management_subnet_naming" {
-  source = "../modules/naming"
-
-  resource_type = "snet"
-  workload      = "management"
-  environment   = var.environment
-  location      = var.location
-  instance      = "001"
-  common_tags   = var.tags
-}
-
-# ============================================================================
 # Hub Virtual Network
 # ============================================================================
 
 module "hub_vnet" {
   source = "../modules/vnet"
 
-  vnet_name           = module.hub_vnet_naming.name
+  # Naming (module handles naming internally)
+  resource_type = "vnet"
+  workload      = "hub"
+  environment   = var.environment
+  instance      = "001"
+  common_tags   = var.tags
+
+  # Network Configuration
   location            = var.location
   resource_group_name = module.rg_networking.rg_name
   address_space       = [local.hub_address_space]
-
-  tags = module.hub_vnet_naming.tags
 
   depends_on = [module.rg_networking]
 }
@@ -91,7 +70,7 @@ module "management_subnet" {
   count  = local.deploy_mgmt ? 1 : 0
   source = "../modules/subnet"
 
-  subnet_name          = module.management_subnet_naming.name
+  subnet_name          = "snet-management-${var.environment}-${var.location}-001"
   resource_group_name  = module.rg_networking.rg_name
   virtual_network_name = module.hub_vnet.vnet_name
   address_prefixes     = [local.management_subnet]

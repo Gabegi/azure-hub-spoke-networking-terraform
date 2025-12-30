@@ -1,21 +1,51 @@
 # modules/app-gateway/main.tf
 # Application Gateway resource
 
+# ============================================================================
+# Internal Naming Modules
+# ============================================================================
+
+module "app_gateway_naming" {
+  source = "../naming"
+
+  resource_type = var.resource_type
+  workload      = var.workload
+  environment   = var.environment
+  location      = var.location
+  instance      = var.instance
+  common_tags   = var.common_tags
+}
+
+module "app_gateway_pip_naming" {
+  source = "../naming"
+
+  resource_type = "pip"
+  workload      = "appgw"
+  environment   = var.environment
+  location      = var.location
+  instance      = var.instance
+  common_tags   = var.common_tags
+}
+
+# ============================================================================
+# Application Gateway Resources
+# ============================================================================
+
 # Public IP for Application Gateway
 resource "azurerm_public_ip" "app_gateway" {
-  name                = var.public_ip_name
+  name                = module.app_gateway_pip_naming.name
   location            = var.location
   resource_group_name = var.resource_group_name
   allocation_method   = "Static"
   sku                 = "Standard"
   zones               = var.availability_zones
 
-  tags = var.tags
+  tags = module.app_gateway_pip_naming.tags
 }
 
 # Application Gateway
 resource "azurerm_application_gateway" "main" {
-  name                = var.app_gateway_name
+  name                = module.app_gateway_naming.name
   location            = var.location
   resource_group_name = var.resource_group_name
   zones               = var.availability_zones
@@ -151,7 +181,7 @@ resource "azurerm_application_gateway" "main" {
     policy_name = "AppGwSslPolicy20220101"
   }
 
-  tags = var.tags
+  tags = module.app_gateway_naming.tags
 
   lifecycle {
     prevent_destroy = false
@@ -162,7 +192,7 @@ resource "azurerm_application_gateway" "main" {
 resource "azurerm_monitor_diagnostic_setting" "app_gateway" {
   count = var.enable_diagnostic_settings ? 1 : 0
 
-  name                       = "diag-${var.app_gateway_name}"
+  name                       = "${module.app_gateway_naming.name}-diag"
   target_resource_id         = azurerm_application_gateway.main.id
   log_analytics_workspace_id = var.log_analytics_workspace_id
 
