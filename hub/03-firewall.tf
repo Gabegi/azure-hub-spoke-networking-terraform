@@ -52,6 +52,10 @@ module "firewall" {
   resource_group_name = module.rg_networking.rg_name
   subnet_id           = module.firewall_subnet.subnet_id
 
+  # Management IP Configuration (required for Basic SKU)
+  firewall_management_ip_name = var.firewall_sku_tier == "Basic" ? "pip-firewall-mgmt-${var.environment}-${var.location}-001" : null
+  management_subnet_id        = var.firewall_sku_tier == "Basic" ? module.firewall_management_subnet[0].subnet_id : null
+
   # SKU Configuration
   sku_name = "AZFW_VNet"
   sku_tier = var.firewall_sku_tier
@@ -78,6 +82,7 @@ module "firewall" {
 
   depends_on = [
     module.firewall_subnet,
+    module.firewall_management_subnet,
     azurerm_log_analytics_workspace.hub
   ]
 }
