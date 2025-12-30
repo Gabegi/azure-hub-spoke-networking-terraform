@@ -44,8 +44,8 @@ output "firewall_subnet_id" {
 }
 
 output "bastion_subnet_id" {
-  value       = module.bastion_subnet.subnet_id
-  description = "Bastion subnet ID"
+  value       = local.deploy_bastion ? module.bastion_subnet[0].subnet_id : null
+  description = "Bastion subnet ID (if deployed)"
 }
 
 output "management_subnet_id" {
@@ -54,8 +54,8 @@ output "management_subnet_id" {
 }
 
 output "app_gateway_subnet_id" {
-  value       = module.app_gateway_subnet.subnet_id
-  description = "Application Gateway subnet ID"
+  value       = local.deploy_app_gateway ? module.app_gateway_subnet[0].subnet_id : null
+  description = "Application Gateway subnet ID (if deployed)"
 }
 
 # ============================================================================

@@ -39,7 +39,7 @@ module "bastion" {
   public_ip_name      = module.bastion_pip_naming.name
   location            = var.location
   resource_group_name = module.rg_networking.rg_name
-  subnet_id           = module.bastion_subnet.subnet_id
+  subnet_id           = module.bastion_subnet[0].subnet_id
 
   # SKU Configuration
   sku         = var.bastion_sku

@@ -27,7 +27,7 @@ module "rg_networking" {
   location = var.location
   tags     = module.rg_naming.tags
 
-  # # Enable resource lock for production
+  # # Enable resource lock for production (only enable when not testing)
   # enable_resource_lock = var.environment == "prod" ? var.enable_resource_lock : false
   # lock_level          = "CanNotDelete"
   # lock_notes          = "Production networking resources - managed by Terraform"

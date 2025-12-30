@@ -73,8 +73,9 @@ module "firewall_management_subnet" {
   depends_on = [module.hub_vnet]
 }
 
-# AzureBastionSubnet (REQUIRED - exact name)
+# AzureBastionSubnet (REQUIRED only if deploying Bastion)
 module "bastion_subnet" {
+  count  = local.deploy_bastion ? 1 : 0
   source = "../modules/subnet"
 
   subnet_name          = "AzureBastionSubnet"
@@ -105,8 +106,9 @@ module "management_subnet" {
   depends_on = [module.hub_vnet]
 }
 
-# Application Gateway Subnet
+# Application Gateway Subnet (REQUIRED only if deploying App Gateway)
 module "app_gateway_subnet" {
+  count  = local.deploy_app_gateway ? 1 : 0
   source = "../modules/subnet"
 
   subnet_name          = "snet-appgw-${var.environment}-${var.location}-001"

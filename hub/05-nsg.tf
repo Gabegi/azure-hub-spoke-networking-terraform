@@ -85,7 +85,7 @@ module "app_gateway_nsg" {
   security_rules = var.app_gateway_nsg_rules
 
   # Associate with app gateway subnet
-  subnet_id = module.app_gateway_subnet.subnet_id
+  subnet_id = module.app_gateway_subnet[0].subnet_id
 
   # Flow Logs
   enable_flow_logs                    = local.enable_flow_logs
