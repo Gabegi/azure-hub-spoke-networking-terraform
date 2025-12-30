@@ -99,6 +99,18 @@ variable "firewall_dns_servers" {
   default     = []
 }
 
+variable "firewall_network_rules" {
+  type = list(object({
+    name                  = string
+    protocols             = list(string)
+    source_addresses      = list(string)
+    destination_addresses = list(string)
+    destination_ports     = list(string)
+  }))
+  description = "Network rules for Azure Firewall"
+  default     = []
+}
+
 # ============================================================================
 # Bastion Configuration
 # ============================================================================
