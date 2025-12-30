@@ -1,13 +1,32 @@
 # modules/nsg/main.tf
 # Generic Network Security Group (NSG) module - provides subnet-level firewall rules
 
+# ============================================================================
+# Internal Naming Module
+# ============================================================================
+
+module "nsg_naming" {
+  source = "../naming"
+
+  resource_type = var.resource_type
+  workload      = var.workload
+  environment   = var.environment
+  location      = var.location
+  instance      = var.instance
+  common_tags   = var.common_tags
+}
+
+# ============================================================================
+# Network Security Group
+# ============================================================================
+
 # Network Security Group
 # Acts as a virtual firewall for controlling inbound/outbound traffic to subnets or NICs
 resource "azurerm_network_security_group" "nsg" {
-  name                = var.nsg_name
+  name                = module.nsg_naming.name
   location            = var.location
   resource_group_name = var.resource_group_name
-  tags                = var.tags
+  tags                = module.nsg_naming.tags
 
   # Prevent accidental deletion in production
   lifecycle {
@@ -89,7 +108,7 @@ resource "azurerm_network_interface_security_group_association" "nsg_nic" {
 resource "azurerm_network_watcher_flow_log" "nsg_flow_log" {
   count = var.enable_flow_logs ? 1 : 0
 
-  name                      = "${var.nsg_name}-flow-log"
+  name                      = "${module.nsg_naming.name}-flow-log"
   network_watcher_name      = var.network_watcher_name
   resource_group_name       = var.network_watcher_resource_group_name
   network_security_group_id = azurerm_network_security_group.nsg.id
@@ -114,7 +133,7 @@ resource "azurerm_network_watcher_flow_log" "nsg_flow_log" {
     }
   }
 
-  tags = var.tags
+  tags = module.nsg_naming.tags
 
   depends_on = [
     azurerm_network_security_group.nsg
@@ -126,7 +145,7 @@ resource "azurerm_network_watcher_flow_log" "nsg_flow_log" {
 resource "azurerm_monitor_diagnostic_setting" "nsg" {
   count = var.enable_diagnostic_settings ? 1 : 0
 
-  name                       = "${var.nsg_name}-diag"
+  name                       = "${module.nsg_naming.name}-diag"
   target_resource_id         = azurerm_network_security_group.nsg.id
   log_analytics_workspace_id = var.log_analytics_workspace_id
 
@@ -153,7 +172,7 @@ resource "azurerm_application_security_group" "asg" {
   name                = each.value.name
   location            = var.location
   resource_group_name = var.resource_group_name
-  tags                = merge(var.tags, try(each.value.tags, {}))
+  tags                = merge(module.nsg_naming.tags, try(each.value.tags, {}))
 
   lifecycle {
     prevent_destroy = false

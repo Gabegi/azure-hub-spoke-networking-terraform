@@ -1,18 +1,40 @@
 # modules/nsg/variables.tf
 
 # ============================================================================
-# Required Variables
+# Naming Variables (for internal naming module)
 # ============================================================================
 
-variable "nsg_name" {
+variable "resource_type" {
   type        = string
-  description = "Name of the network security group"
-
-  validation {
-    condition     = can(regex("^[a-zA-Z0-9][a-zA-Z0-9-_.]{0,78}[a-zA-Z0-9_]$", var.nsg_name))
-    error_message = "NSG name must be 1-80 characters and contain only alphanumeric, hyphens, underscores, or periods"
-  }
+  description = "Azure resource type abbreviation (e.g., 'nsg')"
+  default     = "nsg"
 }
+
+variable "workload" {
+  type        = string
+  description = "Workload or application name (e.g., 'management', 'app', 'web')"
+}
+
+variable "environment" {
+  type        = string
+  description = "Environment name (e.g., 'dev', 'prod', 'staging')"
+}
+
+variable "instance" {
+  type        = string
+  description = "Instance number (e.g., '001', '002')"
+  default     = "001"
+}
+
+variable "common_tags" {
+  type        = map(string)
+  description = "Common tags to merge with module-generated tags"
+  default     = {}
+}
+
+# ============================================================================
+# Required Variables
+# ============================================================================
 
 variable "location" {
   type        = string
