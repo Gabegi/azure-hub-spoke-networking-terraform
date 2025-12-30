@@ -1,28 +1,40 @@
 # modules/bastion/variables.tf
 
 # ============================================================================
-# Required Variables
+# Naming Variables (for internal naming module)
 # ============================================================================
 
-variable "bastion_name" {
+variable "resource_type" {
   type        = string
-  description = "Name of the Azure Bastion host (must be unique within region)"
-
-  validation {
-    condition     = can(regex("^[a-zA-Z0-9][a-zA-Z0-9-]{0,78}[a-zA-Z0-9]$", var.bastion_name))
-    error_message = "Bastion name must be 1-80 characters, start/end with alphanumeric, and contain only alphanumeric or hyphens"
-  }
+  description = "Azure resource type abbreviation (e.g., 'bas' for Bastion)"
+  default     = "bas"
 }
 
-variable "public_ip_name" {
+variable "workload" {
   type        = string
-  description = "Name of the public IP for Bastion (must be unique within resource group)"
-
-  validation {
-    condition     = can(regex("^[a-zA-Z0-9][a-zA-Z0-9-_.]{0,78}[a-zA-Z0-9_]$", var.public_ip_name))
-    error_message = "Public IP name must be 1-80 characters and contain only alphanumeric, hyphens, underscores, or periods"
-  }
+  description = "Workload or application name (e.g., 'hub')"
 }
+
+variable "environment" {
+  type        = string
+  description = "Environment name (e.g., 'dev', 'prod', 'staging')"
+}
+
+variable "instance" {
+  type        = string
+  description = "Instance number (e.g., '001', '002')"
+  default     = "001"
+}
+
+variable "common_tags" {
+  type        = map(string)
+  description = "Common tags to merge with module-generated tags"
+  default     = {}
+}
+
+# ============================================================================
+# Required Variables
+# ============================================================================
 
 variable "location" {
   type        = string

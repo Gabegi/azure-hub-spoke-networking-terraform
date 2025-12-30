@@ -1,15 +1,41 @@
 # modules/app-gateway/variables.tf
 # Application Gateway module variables
 
-variable "app_gateway_name" {
+# ============================================================================
+# Naming Variables (for internal naming module)
+# ============================================================================
+
+variable "resource_type" {
   type        = string
-  description = "Name of the Application Gateway"
+  description = "Azure resource type abbreviation (e.g., 'agw' for App Gateway)"
+  default     = "agw"
 }
 
-variable "public_ip_name" {
+variable "workload" {
   type        = string
-  description = "Name of the Public IP for Application Gateway"
+  description = "Workload or application name (e.g., 'hub', 'app')"
 }
+
+variable "environment" {
+  type        = string
+  description = "Environment name (e.g., 'dev', 'prod', 'staging')"
+}
+
+variable "instance" {
+  type        = string
+  description = "Instance number (e.g., '001', '002')"
+  default     = "001"
+}
+
+variable "common_tags" {
+  type        = map(string)
+  description = "Common tags to merge with module-generated tags"
+  default     = {}
+}
+
+# ============================================================================
+# Required Variables
+# ============================================================================
 
 variable "location" {
   type        = string

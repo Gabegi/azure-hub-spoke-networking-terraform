@@ -1,16 +1,46 @@
 # modules/bastion/main.tf
 # Azure Bastion module for secure RDP/SSH access without exposing VMs to the internet
 
+# ============================================================================
+# Internal Naming Modules
+# ============================================================================
+
+module "bastion_naming" {
+  source = "../naming"
+
+  resource_type = var.resource_type
+  workload      = var.workload
+  environment   = var.environment
+  location      = var.location
+  instance      = var.instance
+  common_tags   = var.common_tags
+}
+
+module "bastion_pip_naming" {
+  source = "../naming"
+
+  resource_type = "pip"
+  workload      = "bastion"
+  environment   = var.environment
+  location      = var.location
+  instance      = var.instance
+  common_tags   = var.common_tags
+}
+
+# ============================================================================
+# Azure Bastion Resources
+# ============================================================================
+
 # Public IP for Azure Bastion (required)
 # Must be Static and Standard SKU for Bastion compatibility
 resource "azurerm_public_ip" "bastion" {
-  name                = var.public_ip_name
+  name                = module.bastion_pip_naming.name
   location            = var.location
   resource_group_name = var.resource_group_name
   allocation_method   = "Static"              # Required for Bastion
   sku                 = "Standard"            # Required for Bastion
   zones               = var.availability_zones # Optional zone redundancy for HA
-  tags                = var.tags
+  tags                = module.bastion_pip_naming.tags
 
   # Prevent accidental deletion in production
   lifecycle {
@@ -21,7 +51,7 @@ resource "azurerm_public_ip" "bastion" {
 # Azure Bastion Host
 # Provides secure browser-based RDP/SSH access to VMs without public IPs
 resource "azurerm_bastion_host" "bastion" {
-  name                = var.bastion_name
+  name                = module.bastion_naming.name
   location            = var.location
   resource_group_name = var.resource_group_name
 
@@ -36,7 +66,7 @@ resource "azurerm_bastion_host" "bastion" {
   shareable_link_enabled = var.shareable_link_enabled  # Generate shareable links (Standard only)
   tunneling_enabled      = var.tunneling_enabled       # Native client support (Standard only)
 
-  tags = var.tags
+  tags = module.bastion_naming.tags
 
   # IP configuration - connects Bastion to AzureBastionSubnet
   ip_configuration {
@@ -59,7 +89,7 @@ resource "azurerm_bastion_host" "bastion" {
 resource "azurerm_monitor_diagnostic_setting" "bastion" {
   count = var.enable_diagnostic_settings ? 1 : 0
 
-  name                       = "${var.bastion_name}-diag"
+  name                       = "${module.bastion_naming.name}-diag"
   target_resource_id         = azurerm_bastion_host.bastion.id
   log_analytics_workspace_id = var.log_analytics_workspace_id
 
