@@ -107,7 +107,7 @@ resource "azurerm_firewall_policy_rule_collection_group" "hub_rules" {
   # Collection 1: Critical Services - ALL ENVIRONMENTS
   application_rule_collection {
     name     = "AllowCriticalServices"
-    priority = 100
+    priority = 400
     action   = "Allow"
 
     # Windows Update - MUST HAVE for security patches
@@ -183,7 +183,7 @@ resource "azurerm_firewall_policy_rule_collection_group" "hub_rules" {
   # Collection 2: DEVELOPMENT ENVIRONMENT - Full Azure + Internet Access
   application_rule_collection {
     name     = "AllowDevelopmentEnvironment"
-    priority = 200
+    priority = 500
     action   = "Allow"
 
     # Development → Full Azure Services
@@ -291,7 +291,7 @@ resource "azurerm_firewall_policy_rule_collection_group" "hub_rules" {
   # Collection 3: PRODUCTION ENVIRONMENT - RESTRICTED (Essential Only)
   application_rule_collection {
     name     = "AllowProductionEnvironment"
-    priority = 300
+    priority = 600
     action   = "Allow"
 
     # Production → Essential Azure Services ONLY
