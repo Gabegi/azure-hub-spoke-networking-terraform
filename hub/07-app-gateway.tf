@@ -2,32 +2,6 @@
 # Application Gateway configuration
 
 # ============================================================================
-# Naming Modules
-# ============================================================================
-
-module "app_gateway_naming" {
-  source = "../modules/naming"
-
-  resource_type = "agw"
-  workload      = "hub"
-  environment   = var.environment
-  location      = var.location
-  instance      = "001"
-  common_tags   = var.tags
-}
-
-module "app_gateway_pip_naming" {
-  source = "../modules/naming"
-
-  resource_type = "pip"
-  workload      = "appgw"
-  environment   = var.environment
-  location      = var.location
-  instance      = "001"
-  common_tags   = var.tags
-}
-
-# ============================================================================
 # Application Gateway
 # ============================================================================
 
@@ -35,16 +9,22 @@ module "app_gateway" {
   count  = local.deploy_app_gateway ? 1 : 0
   source = "../modules/app-gateway"
 
-  app_gateway_name = module.app_gateway_naming.name
-  public_ip_name   = module.app_gateway_pip_naming.name
-  location         = var.location
+  # Naming (module handles naming internally)
+  resource_type = "agw"
+  workload      = "hub"
+  environment   = var.environment
+  location      = var.location
+  instance      = "001"
+  common_tags   = var.tags
+
+  # Network Configuration
   resource_group_name = module.rg_networking.rg_name
-  subnet_id        = module.app_gateway_subnet[0].subnet_id
+  subnet_id           = module.app_gateway_subnet[0].subnet_id
 
   # SKU Configuration
-  sku_name          = var.app_gateway_sku_name
-  sku_tier          = var.app_gateway_sku_tier
-  enable_autoscale  = var.app_gateway_enable_autoscale
+  sku_name               = var.app_gateway_sku_name
+  sku_tier               = var.app_gateway_sku_tier
+  enable_autoscale       = var.app_gateway_enable_autoscale
   autoscale_min_capacity = var.app_gateway_min_capacity
   autoscale_max_capacity = var.app_gateway_max_capacity
 
@@ -110,8 +90,6 @@ module "app_gateway" {
   # Monitoring
   enable_diagnostic_settings = local.enable_diagnostics
   log_analytics_workspace_id = azurerm_log_analytics_workspace.hub.id
-
-  tags = module.app_gateway_naming.tags
 
   depends_on = [
     module.app_gateway_subnet,
