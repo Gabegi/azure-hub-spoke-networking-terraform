@@ -2,32 +2,6 @@
 # Azure Bastion configuration
 
 # ============================================================================
-# Naming Modules
-# ============================================================================
-
-module "bastion_naming" {
-  source = "../modules/naming"
-
-  resource_type = "bas"
-  workload      = "hub"
-  environment   = var.environment
-  location      = var.location
-  instance      = "001"
-  common_tags   = var.tags
-}
-
-module "bastion_pip_naming" {
-  source = "../modules/naming"
-
-  resource_type = "pip"
-  workload      = "bastion"
-  environment   = var.environment
-  location      = var.location
-  instance      = "001"
-  common_tags   = var.tags
-}
-
-# ============================================================================
 # Azure Bastion
 # ============================================================================
 
@@ -35,9 +9,15 @@ module "bastion" {
   count  = local.deploy_bastion ? 1 : 0
   source = "../modules/bastion"
 
-  bastion_name        = module.bastion_naming.name
-  public_ip_name      = module.bastion_pip_naming.name
-  location            = var.location
+  # Naming (module handles naming internally)
+  resource_type = "bas"
+  workload      = "hub"
+  environment   = var.environment
+  location      = var.location
+  instance      = "001"
+  common_tags   = var.tags
+
+  # Network Configuration
   resource_group_name = module.rg_networking.rg_name
   subnet_id           = module.bastion_subnet[0].subnet_id
 
@@ -57,8 +37,6 @@ module "bastion" {
   # Monitoring
   enable_diagnostic_settings = local.enable_diagnostics
   log_analytics_workspace_id = azurerm_log_analytics_workspace.hub.id
-
-  tags = module.bastion_naming.tags
 
   depends_on = [
     module.bastion_subnet,

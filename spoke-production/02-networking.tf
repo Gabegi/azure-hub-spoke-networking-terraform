@@ -10,7 +10,7 @@ module "spoke_vnet" {
 
   # Naming (module handles naming internally)
   resource_type = "vnet"
-  workload      = "spoke-production"
+  workload      = "spoke"
   environment   = var.environment
   location      = var.location
   instance      = "001"
