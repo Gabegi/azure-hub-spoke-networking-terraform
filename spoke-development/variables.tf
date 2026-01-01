@@ -73,6 +73,41 @@ variable "deploy_aci_subnet" {
 }
 
 # ============================================================================
+# Service Endpoints Configuration
+# ============================================================================
+
+variable "workload_subnet_service_endpoints" {
+  type        = list(string)
+  description = "Service endpoints for workload subnet"
+  default = [
+    "Microsoft.Storage",
+    "Microsoft.KeyVault",
+    "Microsoft.Sql",
+    "Microsoft.ContainerRegistry"
+  ]
+}
+
+variable "data_subnet_service_endpoints" {
+  type        = list(string)
+  description = "Service endpoints for data subnet"
+  default = [
+    "Microsoft.Storage",
+    "Microsoft.KeyVault",
+    "Microsoft.Sql"
+  ]
+}
+
+variable "app_subnet_service_endpoints" {
+  type        = list(string)
+  description = "Service endpoints for app subnet"
+  default = [
+    "Microsoft.Storage",
+    "Microsoft.KeyVault",
+    "Microsoft.ContainerRegistry"
+  ]
+}
+
+# ============================================================================
 # Hub Integration
 # ============================================================================
 
