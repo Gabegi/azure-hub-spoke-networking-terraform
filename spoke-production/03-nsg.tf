@@ -2,43 +2,6 @@
 # Network Security Groups for Production Spoke subnets
 
 # ============================================================================
-# Naming Modules
-# ============================================================================
-
-module "workload_nsg_naming" {
-  source = "../modules/naming"
-
-  resource_type = "nsg"
-  workload      = "workload"
-  environment   = var.environment
-  location      = var.location
-  instance      = "001"
-  common_tags   = var.tags
-}
-
-module "data_nsg_naming" {
-  source = "../modules/naming"
-
-  resource_type = "nsg"
-  workload      = "data"
-  environment   = var.environment
-  location      = var.location
-  instance      = "001"
-  common_tags   = var.tags
-}
-
-module "app_nsg_naming" {
-  source = "../modules/naming"
-
-  resource_type = "nsg"
-  workload      = "app"
-  environment   = var.environment
-  location      = var.location
-  instance      = "001"
-  common_tags   = var.tags
-}
-
-# ============================================================================
 # Workload Subnet NSG
 # ============================================================================
 
@@ -46,8 +9,15 @@ module "workload_nsg" {
   count  = local.deploy_workload_subnet ? 1 : 0
   source = "../modules/nsg"
 
-  nsg_name            = module.workload_nsg_naming.name
-  location            = var.location
+  # Naming (module handles naming internally)
+  resource_type = "nsg"
+  workload      = "workload"
+  environment   = var.environment
+  location      = var.location
+  instance      = "001"
+  common_tags   = var.tags
+
+  # Network Configuration
   resource_group_name = module.rg_spoke.rg_name
 
   security_rules = [
@@ -131,7 +101,7 @@ module "workload_nsg" {
   # Diagnostic Settings
   enable_diagnostic_settings = local.enable_diagnostics
 
-  tags = module.workload_nsg_naming.tags
+  
 
   depends_on = [
     module.workload_subnet
@@ -146,8 +116,15 @@ module "data_nsg" {
   count  = local.deploy_data_subnet ? 1 : 0
   source = "../modules/nsg"
 
-  nsg_name            = module.data_nsg_naming.name
-  location            = var.location
+  # Naming (module handles naming internally)
+  resource_type = "nsg"
+  workload      = "data"
+  environment   = var.environment
+  location      = var.location
+  instance      = "001"
+  common_tags   = var.tags
+
+  # Network Configuration
   resource_group_name = module.rg_spoke.rg_name
 
   security_rules = [
@@ -219,7 +196,7 @@ module "data_nsg" {
   # Diagnostic Settings
   enable_diagnostic_settings = local.enable_diagnostics
 
-  tags = module.data_nsg_naming.tags
+  
 
   depends_on = [
     module.data_subnet
@@ -234,8 +211,15 @@ module "app_nsg" {
   count  = local.deploy_app_subnet ? 1 : 0
   source = "../modules/nsg"
 
-  nsg_name            = module.app_nsg_naming.name
-  location            = var.location
+  # Naming (module handles naming internally)
+  resource_type = "nsg"
+  workload      = "app"
+  environment   = var.environment
+  location      = var.location
+  instance      = "001"
+  common_tags   = var.tags
+
+  # Network Configuration
   resource_group_name = module.rg_spoke.rg_name
 
   security_rules = [
@@ -307,7 +291,7 @@ module "app_nsg" {
   # Diagnostic Settings
   enable_diagnostic_settings = local.enable_diagnostics
 
-  tags = module.app_nsg_naming.tags
+  
 
   depends_on = [
     module.app_subnet

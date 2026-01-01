@@ -16,17 +16,6 @@ module "aci_subnet_naming" {
   common_tags   = var.tags
 }
 
-module "aci_nsg_naming" {
-  source = "../modules/naming"
-
-  resource_type = "nsg"
-  workload      = "aci"
-  environment   = var.environment
-  location      = var.location
-  instance      = "001"
-  common_tags   = var.tags
-}
-
 module "aci_route_table_naming" {
   source = "../modules/naming"
 
@@ -89,8 +78,15 @@ module "aci_nsg" {
   count  = local.deploy_aci_subnet ? 1 : 0
   source = "../modules/nsg"
 
-  nsg_name            = module.aci_nsg_naming.name
-  location            = var.location
+  # Naming (module handles naming internally)
+  resource_type = "nsg"
+  workload      = "aci"
+  environment   = var.environment
+  location      = var.location
+  instance      = "001"
+  common_tags   = var.tags
+
+  # Network Configuration
   resource_group_name = module.rg_spoke.rg_name
 
   security_rules = [
@@ -211,8 +207,6 @@ module "aci_nsg" {
 
   # Diagnostic Settings
   enable_diagnostic_settings = local.enable_diagnostics
-
-  tags = module.aci_nsg_naming.tags
 
   depends_on = [
     module.aci_subnet
