@@ -20,68 +20,8 @@ module "workload_nsg" {
   # Network Configuration
   resource_group_name = module.rg_spoke.rg_name
 
-  security_rules = var.workload_nsg_rules  #OLD:[
-    {
-      name                       = "AllowSSHFromBastion"
-      priority                   = 100
-      direction                  = "Inbound"
-      access                     = "Allow"
-      protocol                   = "Tcp"
-      source_port_range          = "*"
-      destination_port_range     = "22"
-      source_address_prefix      = "10.0.1.0/26"
-      destination_address_prefix = "*"
-      description                = "Allow SSH from Azure Bastion subnet"
-    },
-    {
-      name                       = "AllowAzureLoadBalancer"
-      priority                   = 120
-      direction                  = "Inbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "*"
-      source_address_prefix      = "AzureLoadBalancer"
-      destination_address_prefix = "*"
-      description                = "Allow Azure health probes and platform services"
-    },
-    {
-      name                       = "AllowHTTPSOutbound"
-      priority                   = 200
-      direction                  = "Outbound"
-      access                     = "Allow"
-      protocol                   = "Tcp"
-      source_port_range          = "*"
-      destination_port_range     = "443"
-      source_address_prefix      = "*"
-      destination_address_prefix = "Internet"
-      description                = "Allow HTTPS to Internet"
-    },
-    {
-      name                       = "AllowHTTPOutbound"
-      priority                   = 210
-      direction                  = "Outbound"
-      access                     = "Allow"
-      protocol                   = "Tcp"
-      source_port_range          = "*"
-      destination_port_range     = "80"
-      source_address_prefix      = "*"
-      destination_address_prefix = "Internet"
-      description                = "Allow HTTP to Internet"
-    },
-    {
-      name                       = "DenyAllInbound"
-      priority                   = 4096
-      direction                  = "Inbound"
-      access                     = "Deny"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "*"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "Deny all inbound traffic (rely on explicit allow rules)"
-    }
-  ]
+  # Security rules from variables
+  security_rules = var.workload_nsg_rules
 
   # Associate with workload subnet
   subnet_id = module.workload_subnet[0].subnet_id
@@ -100,8 +40,6 @@ module "workload_nsg" {
 
   # Diagnostic Settings
   enable_diagnostic_settings = local.enable_diagnostics
-
-  
 
   depends_on = [
     module.workload_subnet
@@ -127,56 +65,8 @@ module "data_nsg" {
   # Network Configuration
   resource_group_name = module.rg_spoke.rg_name
 
-  security_rules = var.workload_nsg_rules  #OLD:[
-    {
-      name                       = "AllowSQLFromWorkload"
-      priority                   = 100
-      direction                  = "Inbound"
-      access                     = "Allow"
-      protocol                   = "Tcp"
-      source_port_range          = "*"
-      destination_port_range     = "1433"
-      source_address_prefix      = local.workload_subnet
-      destination_address_prefix = "*"
-      description                = "Allow SQL from workload subnet"
-    },
-    {
-      name                       = "AllowPostgreSQLFromWorkload"
-      priority                   = 110
-      direction                  = "Inbound"
-      access                     = "Allow"
-      protocol                   = "Tcp"
-      source_port_range          = "*"
-      destination_port_range     = "5432"
-      source_address_prefix      = local.workload_subnet
-      destination_address_prefix = "*"
-      description                = "Allow PostgreSQL from workload subnet"
-    },
-    {
-      name                       = "DenyInternetOutbound"
-      priority                   = 100
-      direction                  = "Outbound"
-      access                     = "Deny"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "*"
-      source_address_prefix      = "*"
-      destination_address_prefix = "Internet"
-      description                = "Deny Internet access from data subnet"
-    },
-    {
-      name                       = "DenyAllInbound"
-      priority                   = 4096
-      direction                  = "Inbound"
-      access                     = "Deny"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "*"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "Deny all other inbound traffic"
-    }
-  ]
+  # Security rules from variables
+  security_rules = var.data_nsg_rules
 
   # Associate with data subnet
   subnet_id = module.data_subnet[0].subnet_id
@@ -195,8 +85,6 @@ module "data_nsg" {
 
   # Diagnostic Settings
   enable_diagnostic_settings = local.enable_diagnostics
-
-  
 
   depends_on = [
     module.data_subnet
@@ -222,56 +110,8 @@ module "app_nsg" {
   # Network Configuration
   resource_group_name = module.rg_spoke.rg_name
 
-  security_rules = var.workload_nsg_rules  #OLD:[
-    {
-      name                       = "AllowHTTPInbound"
-      priority                   = 100
-      direction                  = "Inbound"
-      access                     = "Allow"
-      protocol                   = "Tcp"
-      source_port_range          = "*"
-      destination_port_range     = "80"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "Allow HTTP inbound"
-    },
-    {
-      name                       = "AllowHTTPSInbound"
-      priority                   = 110
-      direction                  = "Inbound"
-      access                     = "Allow"
-      protocol                   = "Tcp"
-      source_port_range          = "*"
-      destination_port_range     = "443"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "Allow HTTPS inbound"
-    },
-    {
-      name                       = "AllowHTTPSOutbound"
-      priority                   = 100
-      direction                  = "Outbound"
-      access                     = "Allow"
-      protocol                   = "Tcp"
-      source_port_range          = "*"
-      destination_port_range     = "443"
-      source_address_prefix      = "*"
-      destination_address_prefix = "Internet"
-      description                = "Allow HTTPS to Internet"
-    },
-    {
-      name                       = "DenyAllInbound"
-      priority                   = 4096
-      direction                  = "Inbound"
-      access                     = "Deny"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "*"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "Deny all other inbound traffic"
-    }
-  ]
+  # Security rules from variables
+  security_rules = var.app_nsg_rules
 
   # Associate with app subnet
   subnet_id = module.app_subnet[0].subnet_id
@@ -290,8 +130,6 @@ module "app_nsg" {
 
   # Diagnostic Settings
   enable_diagnostic_settings = local.enable_diagnostics
-
-  
 
   depends_on = [
     module.app_subnet
