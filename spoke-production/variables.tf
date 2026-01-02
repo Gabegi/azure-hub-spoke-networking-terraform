@@ -108,6 +108,78 @@ variable "app_subnet_service_endpoints" {
 }
 
 # ============================================================================
+# Network Security Group Rules
+# ============================================================================
+
+variable "workload_nsg_rules" {
+  type = list(object({
+    name                       = string
+    priority                   = number
+    direction                  = string
+    access                     = string
+    protocol                   = string
+    source_port_range          = string
+    destination_port_range     = string
+    source_address_prefix      = string
+    destination_address_prefix = string
+    description                = string
+  }))
+  description = "Security rules for workload subnet NSG"
+  default     = []
+}
+
+variable "data_nsg_rules" {
+  type = list(object({
+    name                       = string
+    priority                   = number
+    direction                  = string
+    access                     = string
+    protocol                   = string
+    source_port_range          = string
+    destination_port_range     = string
+    source_address_prefix      = string
+    destination_address_prefix = string
+    description                = string
+  }))
+  description = "Security rules for data subnet NSG"
+  default     = []
+}
+
+variable "app_nsg_rules" {
+  type = list(object({
+    name                       = string
+    priority                   = number
+    direction                  = string
+    access                     = string
+    protocol                   = string
+    source_port_range          = string
+    destination_port_range     = string
+    source_address_prefix      = string
+    destination_address_prefix = string
+    description                = string
+  }))
+  description = "Security rules for app subnet NSG"
+  default     = []
+}
+
+variable "aci_nsg_rules" {
+  type = list(object({
+    name                       = string
+    priority                   = number
+    direction                  = string
+    access                     = string
+    protocol                   = string
+    source_port_range          = string
+    destination_port_range     = string
+    source_address_prefix      = string
+    destination_address_prefix = string
+    description                = string
+  }))
+  description = "Security rules for ACI subnet NSG"
+  default     = []
+}
+
+# ============================================================================
 # Hub Integration
 # ============================================================================
 

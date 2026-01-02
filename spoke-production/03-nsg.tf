@@ -20,7 +20,7 @@ module "workload_nsg" {
   # Network Configuration
   resource_group_name = module.rg_spoke.rg_name
 
-  security_rules = [
+  security_rules = var.workload_nsg_rules  #OLD:[
     {
       name                       = "AllowSSHFromBastion"
       priority                   = 100
@@ -127,7 +127,7 @@ module "data_nsg" {
   # Network Configuration
   resource_group_name = module.rg_spoke.rg_name
 
-  security_rules = [
+  security_rules = var.workload_nsg_rules  #OLD:[
     {
       name                       = "AllowSQLFromWorkload"
       priority                   = 100
@@ -222,7 +222,7 @@ module "app_nsg" {
   # Network Configuration
   resource_group_name = module.rg_spoke.rg_name
 
-  security_rules = [
+  security_rules = var.workload_nsg_rules  #OLD:[
     {
       name                       = "AllowHTTPInbound"
       priority                   = 100
