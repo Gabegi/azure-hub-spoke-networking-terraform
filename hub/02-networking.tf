@@ -29,6 +29,7 @@ module "hub_vnet" {
 
 # AzureFirewallSubnet (REQUIRED - exact name)
 module "firewall_subnet" {
+  count  = local.deploy_firewall ? 1 : 0
   source = "../modules/subnet"
 
   subnet_name          = "AzureFirewallSubnet"
@@ -39,33 +40,20 @@ module "firewall_subnet" {
   depends_on = [module.hub_vnet]
 }
 
-# AzureFirewallManagementSubnet (REQUIRED for Basic SKU - exact name)
-module "firewall_management_subnet" {
-  count  = local.deploy_firewall ? 1 : 0
+# GatewaySubnet (REQUIRED for VPN/ExpressRoute - exact name)
+module "gateway_subnet" {
+  count  = local.deploy_gateway ? 1 : 0
   source = "../modules/subnet"
 
-  subnet_name          = "AzureFirewallManagementSubnet"
+  subnet_name          = "GatewaySubnet"
   resource_group_name  = module.rg_networking.rg_name
   virtual_network_name = module.hub_vnet.vnet_name
-  address_prefixes     = [local.firewall_management_subnet]
+  address_prefixes     = [local.gateway_subnet]
 
   depends_on = [module.hub_vnet]
 }
 
-# AzureBastionSubnet (REQUIRED only if deploying Bastion)
-module "bastion_subnet" {
-  count  = local.deploy_bastion ? 1 : 0
-  source = "../modules/subnet"
-
-  subnet_name          = "AzureBastionSubnet"
-  resource_group_name  = module.rg_networking.rg_name
-  virtual_network_name = module.hub_vnet.vnet_name
-  address_prefixes     = [local.bastion_subnet]
-
-  depends_on = [module.hub_vnet]
-}
-
-# Management Subnet (OPTIONAL)
+# Management Subnet (OPTIONAL - future use)
 module "management_subnet" {
   count  = local.deploy_mgmt ? 1 : 0
   source = "../modules/subnet"
@@ -81,19 +69,6 @@ module "management_subnet" {
     "Microsoft.Sql",
     "Microsoft.ContainerRegistry"
   ]
-
-  depends_on = [module.hub_vnet]
-}
-
-# Application Gateway Subnet (REQUIRED only if deploying App Gateway)
-module "app_gateway_subnet" {
-  count  = local.deploy_app_gateway ? 1 : 0
-  source = "../modules/subnet"
-
-  subnet_name          = "snet-appgw-${var.environment}-${var.location}-001"
-  resource_group_name  = module.rg_networking.rg_name
-  virtual_network_name = module.hub_vnet.vnet_name
-  address_prefixes     = [local.app_gateway_subnet]
 
   depends_on = [module.hub_vnet]
 }
