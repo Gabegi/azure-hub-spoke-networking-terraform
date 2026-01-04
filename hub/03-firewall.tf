@@ -19,12 +19,9 @@ module "firewall" {
 
   # Network Configuration
   resource_group_name = module.rg_networking.rg_name
-  subnet_id           = module.firewall_subnet.subnet_id
+  subnet_id           = module.firewall_subnet[0].subnet_id
 
-  # Management IP Configuration (required for Basic SKU)
-  management_subnet_id = var.firewall_sku_tier == "Basic" ? module.firewall_management_subnet[0].subnet_id : null
-
-  # SKU Configuration
+  # SKU Configuration (NOTE: Basic SKU requires management subnet - upgrade to Standard if needed)
   sku_name = "AZFW_VNet"
   sku_tier = var.firewall_sku_tier
 
@@ -34,7 +31,7 @@ module "firewall" {
   # Threat Intelligence
   threat_intel_mode = var.firewall_threat_intel_mode
 
-  # DNS Configuration (not available in Basic SKU)
+  # DNS Configuration
   dns_proxy_enabled = var.firewall_sku_tier != "Basic" ? true : false
   dns_servers       = var.firewall_dns_servers
 
@@ -47,7 +44,6 @@ module "firewall" {
 
   depends_on = [
     module.firewall_subnet,
-    module.firewall_management_subnet,
     azurerm_log_analytics_workspace.hub
   ]
 }
