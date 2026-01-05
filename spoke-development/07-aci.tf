@@ -16,17 +16,6 @@ module "aci_subnet_naming" {
   common_tags   = var.tags
 }
 
-module "aci_route_table_naming" {
-  source = "../modules/naming"
-
-  resource_type = "route"
-  workload      = "aci"
-  environment   = var.environment
-  location      = var.location
-  instance      = "001"
-  common_tags   = var.tags
-}
-
 module "aci_naming" {
   source = "../modules/naming"
 
@@ -109,31 +98,6 @@ module "aci_nsg" {
 
   # Diagnostic Settings
   enable_diagnostic_settings = local.enable_diagnostics
-
-  depends_on = [
-    module.aci_subnet
-  ]
-}
-
-# ============================================================================
-# ACI Subnet Route Table (Force traffic through Hub Firewall)
-# ============================================================================
-
-module "aci_route_table" {
-  count  = local.deploy_aci_subnet && local.enable_forced_tunneling ? 1 : 0
-  source = "../modules/route-table"
-
-  route_table_name             = module.aci_route_table_naming.name
-  location                     = var.location
-  resource_group_name          = module.rg_spoke.rg_name
-  disable_bgp_route_propagation = true
-
-  routes = var.route_table_routes
-
-  # Associate with ACI subnet
-  subnet_id = module.aci_subnet[0].subnet_id
-
-  tags = module.aci_route_table_naming.tags
 
   depends_on = [
     module.aci_subnet
