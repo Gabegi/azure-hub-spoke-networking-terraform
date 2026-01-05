@@ -83,6 +83,15 @@ output "firewall_public_ip" {
 }
 
 # ============================================================================
+# Route Table Outputs
+# ============================================================================
+
+output "gateway_route_table_id" {
+  value       = local.deploy_gateway ? module.gateway_route_table[0].route_table_id : null
+  description = "Gateway subnet route table ID (if deployed)"
+}
+
+# ============================================================================
 # Bastion Outputs
 # ============================================================================
 

@@ -48,6 +48,11 @@ output "aci_nsg_id" {
   description = "ACI NSG ID (if deployed)"
 }
 
+output "aci_route_table_id" {
+  value       = local.deploy_aci_subnet ? module.aci_route_table[0].route_table_id : null
+  description = "ACI route table ID (if deployed)"
+}
+
 # ============================================================================
 # ACI Container Instance Outputs
 # ============================================================================

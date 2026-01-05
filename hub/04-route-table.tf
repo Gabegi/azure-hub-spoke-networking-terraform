@@ -1,48 +1,48 @@
-# spoke-production/04-route-table.tf
-# Route Table for Production Spoke - Forces all traffic through Hub Firewall
+# hub/04-route-table.tf
+# Route Table for Hub - Routes spoke traffic through Firewall
 
 # ============================================================================
-# ACI Subnet Route Table
+# Gateway Subnet Route Table (for VPN/ExpressRoute → Spokes via Firewall)
 # ============================================================================
 
-module "aci_route_table" {
-  count  = local.deploy_aci_subnet ? 1 : 0
+module "gateway_route_table" {
+  count  = local.deploy_gateway ? 1 : 0
   source = "../modules/route-table"
 
   # Naming (module handles naming internally)
   resource_type = "route"
-  workload      = "aci"
+  workload      = "gateway"
   environment   = var.environment
   location      = var.location
   instance      = "001"
   common_tags   = var.tags
 
   # Network Configuration
-  resource_group_name = module.rg_spoke.rg_name
+  resource_group_name = module.rg_networking.rg_name
 
-  # Disable BGP route propagation to prevent on-premises routes
+  # Disable BGP route propagation
   disable_bgp_route_propagation = true
 
-  # Routes - Force all traffic through Hub Firewall
+  # Routes - Route spoke traffic through Firewall
   routes = [
-    {
-      name                   = "InternetViaFirewall"
-      address_prefix         = "0.0.0.0/0"
-      next_hop_type          = "VirtualAppliance"
-      next_hop_in_ip_address = "10.0.0.4"  # Hub Firewall private IP
-    },
     {
       name                   = "DevelopmentSpokeViaFirewall"
       address_prefix         = "10.1.0.0/16"
       next_hop_type          = "VirtualAppliance"
       next_hop_in_ip_address = "10.0.0.4"  # Hub Firewall private IP
+    },
+    {
+      name                   = "ProductionSpokeViaFirewall"
+      address_prefix         = "10.2.0.0/16"
+      next_hop_type          = "VirtualAppliance"
+      next_hop_in_ip_address = "10.0.0.4"  # Hub Firewall private IP
     }
   ]
 
-  # Associate with ACI subnet
-  subnet_id = module.aci_subnet[0].subnet_id
+  # Associate with Gateway subnet
+  subnet_id = module.gateway_subnet[0].subnet_id
 
   depends_on = [
-    module.aci_subnet
+    module.gateway_subnet
   ]
 }
