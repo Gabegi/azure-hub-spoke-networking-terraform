@@ -209,6 +209,103 @@ variable "app_gateway_waf_mode" {
   default     = "Prevention"
 }
 
+variable "app_gateway_backend_address_pools" {
+  type = list(object({
+    name         = string
+    fqdns        = optional(list(string), [])
+    ip_addresses = optional(list(string), [])
+  }))
+  description = "Backend address pools for Application Gateway"
+  default = [{
+    name         = "default-backend-pool"
+    fqdns        = []
+    ip_addresses = []
+  }]
+}
+
+variable "app_gateway_backend_http_settings" {
+  type = list(object({
+    name                                = string
+    cookie_based_affinity               = string
+    port                                = number
+    protocol                            = string
+    request_timeout                     = number
+    probe_name                          = optional(string, null)
+    host_name                           = optional(string, null)
+    pick_host_name_from_backend_address = optional(bool, false)
+    path                                = optional(string, "/")
+  }))
+  description = "Backend HTTP settings for Application Gateway"
+  default = [{
+    name                  = "default-http-settings"
+    cookie_based_affinity = "Disabled"
+    port                  = 80
+    protocol              = "Http"
+    request_timeout       = 60
+  }]
+}
+
+variable "app_gateway_health_probes" {
+  type = list(object({
+    name                                      = string
+    protocol                                  = string
+    path                                      = string
+    interval                                  = number
+    timeout                                   = number
+    unhealthy_threshold                       = number
+    pick_host_name_from_backend_http_settings = optional(bool, false)
+    host                                      = optional(string, null)
+    match_status_codes                        = optional(list(string), ["200-399"])
+  }))
+  description = "Health probes for Application Gateway"
+  default = [{
+    name                = "default-health-probe"
+    protocol            = "Http"
+    path                = "/"
+    interval            = 30
+    timeout             = 30
+    unhealthy_threshold = 3
+    match_status_codes  = ["200-399"]
+  }]
+}
+
+variable "app_gateway_http_listeners" {
+  type = list(object({
+    name                 = string
+    frontend_port_name   = string
+    protocol             = string
+    host_name            = optional(string, null)
+    require_sni          = optional(bool, false)
+    ssl_certificate_name = optional(string, null)
+  }))
+  description = "HTTP listeners for Application Gateway"
+  default = [{
+    name               = "default-http-listener"
+    frontend_port_name = "http"
+    protocol           = "Http"
+  }]
+}
+
+variable "app_gateway_request_routing_rules" {
+  type = list(object({
+    name                       = string
+    rule_type                  = string
+    http_listener_name         = string
+    backend_address_pool_name  = string
+    backend_http_settings_name = string
+    priority                   = number
+  }))
+  description = "Request routing rules for Application Gateway"
+  default = [{
+    name                       = "default-routing-rule"
+    rule_type                  = "Basic"
+    http_listener_name         = "default-http-listener"
+    backend_address_pool_name  = "default-backend-pool"
+    backend_http_settings_name = "default-http-settings"
+    priority                   = 100
+  }]
+}
+
 # ============================================================================
 # Network Security Group Rules
 # ============================================================================
