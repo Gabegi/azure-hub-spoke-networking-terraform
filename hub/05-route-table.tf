@@ -23,21 +23,8 @@ module "gateway_route_table" {
   # Disable BGP route propagation
   disable_bgp_route_propagation = true
 
-  # Routes - Route spoke traffic through Firewall
-  routes = [
-    {
-      name                   = "DevelopmentSpokeViaFirewall"
-      address_prefix         = "10.1.0.0/16"
-      next_hop_type          = "VirtualAppliance"
-      next_hop_in_ip_address = "10.0.0.4"  # Hub Firewall private IP
-    },
-    {
-      name                   = "ProductionSpokeViaFirewall"
-      address_prefix         = "10.2.0.0/16"
-      next_hop_type          = "VirtualAppliance"
-      next_hop_in_ip_address = "10.0.0.4"  # Hub Firewall private IP
-    }
-  ]
+  # Routes from tfvars
+  routes = var.gateway_route_table_routes
 
   # Associate with Gateway subnet
   subnet_id = module.gateway_subnet[0].subnet_id

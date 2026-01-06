@@ -248,6 +248,21 @@ variable "app_gateway_nsg_rules" {
 }
 
 # ============================================================================
+# Route Table Configuration
+# ============================================================================
+
+variable "gateway_route_table_routes" {
+  type = list(object({
+    name                   = string
+    address_prefix         = string
+    next_hop_type          = string
+    next_hop_in_ip_address = string
+  }))
+  description = "Routes for Gateway subnet route table"
+  default     = []
+}
+
+# ============================================================================
 # Monitoring
 # ============================================================================
 
