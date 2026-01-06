@@ -23,21 +23,8 @@ module "aci_route_table" {
   # Disable BGP route propagation to prevent on-premises routes
   disable_bgp_route_propagation = true
 
-  # Routes - Force all traffic through Hub Firewall
-  routes = [
-    {
-      name                   = "InternetViaFirewall"
-      address_prefix         = "0.0.0.0/0"
-      next_hop_type          = "VirtualAppliance"
-      next_hop_in_ip_address = "10.0.0.4"  # Hub Firewall private IP
-    },
-    {
-      name                   = "DevelopmentSpokeViaFirewall"
-      address_prefix         = "10.1.0.0/16"
-      next_hop_type          = "VirtualAppliance"
-      next_hop_in_ip_address = "10.0.0.4"  # Hub Firewall private IP
-    }
-  ]
+  # Routes from tfvars
+  routes = var.route_table_routes
 
   # Associate with ACI subnet
   subnet_id = module.aci_subnet[0].subnet_id
