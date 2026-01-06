@@ -52,36 +52,3 @@ module "app_gateway_subnet" {
 
   depends_on = [module.hub_vnet]
 }
-
-# GatewaySubnet (REQUIRED for VPN/ExpressRoute - exact name)
-module "gateway_subnet" {
-  count  = local.deploy_gateway ? 1 : 0
-  source = "../modules/subnet"
-
-  subnet_name          = "GatewaySubnet"
-  resource_group_name  = module.rg_networking.rg_name
-  virtual_network_name = module.hub_vnet.vnet_name
-  address_prefixes     = [local.gateway_subnet]
-
-  depends_on = [module.hub_vnet]
-}
-
-# Management Subnet (OPTIONAL - future use)
-module "management_subnet" {
-  count  = local.deploy_mgmt ? 1 : 0
-  source = "../modules/subnet"
-
-  subnet_name          = "snet-management-${var.environment}-${var.location}-001"
-  resource_group_name  = module.rg_networking.rg_name
-  virtual_network_name = module.hub_vnet.vnet_name
-  address_prefixes     = [local.management_subnet]
-
-  service_endpoints = [
-    "Microsoft.Storage",
-    "Microsoft.KeyVault",
-    "Microsoft.Sql",
-    "Microsoft.ContainerRegistry"
-  ]
-
-  depends_on = [module.hub_vnet]
-}
