@@ -7,7 +7,7 @@ locals {
 
   # Subnet CIDR blocks
   firewall_subnet     = "10.0.0.0/26"   # 64 IPs - AzureFirewallSubnet (required name)
-  app_gateway_subnet  = "10.0.1.0/24"   # 256 IPs - Application Gateway subnet
+  app_gateway_subnet  = "10.0.1.0/27"   # 32 IPs - Application Gateway subnet
   gateway_subnet      = "10.0.2.0/26"   # 64 IPs - GatewaySubnet (for VPN/ExpressRoute)
   management_subnet   = "10.0.3.0/27"   # 32 IPs - Management subnet (optional, future use)
 

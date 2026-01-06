@@ -83,6 +83,30 @@ output "firewall_public_ip" {
 }
 
 # ============================================================================
+# Application Gateway Outputs
+# ============================================================================
+
+output "app_gateway_id" {
+  value       = local.deploy_app_gateway ? module.app_gateway[0].app_gateway_id : null
+  description = "Application Gateway ID"
+}
+
+output "app_gateway_name" {
+  value       = local.deploy_app_gateway ? module.app_gateway[0].app_gateway_name : null
+  description = "Application Gateway name"
+}
+
+output "app_gateway_public_ip" {
+  value       = local.deploy_app_gateway ? module.app_gateway[0].public_ip_address : null
+  description = "Application Gateway public IP address"
+}
+
+output "app_gateway_backend_pool_ids" {
+  value       = local.deploy_app_gateway ? module.app_gateway[0].backend_address_pool_ids : null
+  description = "Application Gateway backend pool IDs"
+}
+
+# ============================================================================
 # Route Table Outputs
 # ============================================================================
 
@@ -149,12 +173,14 @@ output "storage_account_id" {
 
 output "hub_summary" {
   value = {
-    resource_group       = module.rg_networking.rg_name
-    vnet_name           = module.hub_vnet.vnet_name
-    vnet_address_space  = local.hub_address_space
-    firewall_deployed   = local.deploy_firewall
-    firewall_private_ip = local.deploy_firewall ? module.firewall[0].firewall_private_ip : null
-    bastion_deployed    = local.deploy_bastion
+    resource_group        = module.rg_networking.rg_name
+    vnet_name            = module.hub_vnet.vnet_name
+    vnet_address_space   = local.hub_address_space
+    firewall_deployed    = local.deploy_firewall
+    firewall_private_ip  = local.deploy_firewall ? module.firewall[0].firewall_private_ip : null
+    app_gateway_deployed = local.deploy_app_gateway
+    app_gateway_public_ip = local.deploy_app_gateway ? module.app_gateway[0].public_ip_address : null
+    bastion_deployed     = local.deploy_bastion
     management_deployed  = local.deploy_mgmt
   }
   description = "Hub configuration summary"
