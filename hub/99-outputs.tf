@@ -39,13 +39,8 @@ output "vnet_address_space" {
 # ============================================================================
 
 output "firewall_subnet_id" {
-  value       = module.firewall_subnet.subnet_id
+  value       = local.deploy_firewall ? module.firewall_subnet[0].subnet_id : null
   description = "Firewall subnet ID"
-}
-
-output "bastion_subnet_id" {
-  value       = local.deploy_bastion ? module.bastion_subnet[0].subnet_id : null
-  description = "Bastion subnet ID (if deployed)"
 }
 
 output "management_subnet_id" {
@@ -115,38 +110,7 @@ output "app_gateway_route_table_id" {
   description = "App Gateway subnet route table ID (if deployed)"
 }
 
-# ============================================================================
-# Bastion Outputs
-# ============================================================================
-
-output "bastion_id" {
-  value       = local.deploy_bastion ? module.bastion[0].bastion_id : null
-  description = "Azure Bastion ID"
-}
-
-output "bastion_name" {
-  value       = local.deploy_bastion ? module.bastion[0].bastion_name : null
-  description = "Azure Bastion name"
-}
-
-output "bastion_fqdn" {
-  value       = local.deploy_bastion ? module.bastion[0].bastion_dns_name : null
-  description = "Azure Bastion FQDN"
-}
-
-# ============================================================================
-# NSG Outputs
-# ============================================================================
-
-output "management_nsg_id" {
-  value       = local.deploy_mgmt ? module.management_nsg[0].nsg_id : null
-  description = "Management NSG ID"
-}
-
-output "app_gateway_nsg_id" {
-  value       = local.deploy_app_gateway ? module.app_gateway_nsg[0].nsg_id : null
-  description = "Application Gateway NSG ID"
-}
+# Note: Bastion and NSG modules not yet implemented in hub
 
 # ============================================================================
 # Monitoring Outputs
@@ -180,7 +144,6 @@ output "hub_summary" {
     firewall_private_ip  = local.deploy_firewall ? module.firewall[0].firewall_private_ip : null
     app_gateway_deployed = local.deploy_app_gateway
     app_gateway_public_ip = local.deploy_app_gateway ? module.app_gateway[0].public_ip_address : null
-    bastion_deployed     = local.deploy_bastion
     management_deployed  = local.deploy_mgmt
   }
   description = "Hub configuration summary"
