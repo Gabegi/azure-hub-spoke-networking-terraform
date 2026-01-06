@@ -65,6 +65,12 @@ variable "deploy_app_gateway" {
   default     = true
 }
 
+variable "deploy_gateway" {
+  type        = bool
+  description = "Deploy App Gateway"
+  default     = false
+}
+
 variable "deploy_management_subnet" {
   type        = bool
   description = "Deploy management subnet"
@@ -348,14 +354,14 @@ variable "app_gateway_nsg_rules" {
 # Route Table Configuration
 # ============================================================================
 
-variable "gateway_route_table_routes" {
+variable "app_gateway_route_table_routes" {
   type = list(object({
     name                   = string
     address_prefix         = string
     next_hop_type          = string
     next_hop_in_ip_address = string
   }))
-  description = "Routes for Gateway subnet route table"
+  description = "Routes for App Gateway subnet route table"
   default     = []
 }
 

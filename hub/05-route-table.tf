@@ -1,21 +1,17 @@
-# hub/04-route-table.tf
+# hub/05-route-table.tf
 # Route Table for Hub - Routes spoke traffic through Firewall
 
 # ============================================================================
-# Gateway Subnet Route Table (for VPN/ExpressRoute → Spokes via Firewall)
+# App Gateway Subnet Route Table (for App Gateway → Spokes via Firewall)
 # ============================================================================
 
-module "gateway_route_table" {
-  count  = local.deploy_gateway ? 1 : 0
+module "app_gateway_route_table" {
+  count  = local.deploy_app_gateway ? 1 : 0
   source = "../modules/route-table"
 
-  # Naming (module handles naming internally)
-  resource_type = "route"
-  workload      = "gateway"
-  environment   = var.environment
-  location      = var.location
-  instance      = "001"
-  common_tags   = var.tags
+  # Naming
+  route_table_name = "route-appgw-${var.environment}-${var.location}-001"
+  location         = var.location
 
   # Network Configuration
   resource_group_name = module.rg_networking.rg_name
@@ -23,13 +19,16 @@ module "gateway_route_table" {
   # Disable BGP route propagation
   disable_bgp_route_propagation = true
 
-  # Routes from tfvars
-  routes = var.gateway_route_table_routes
+  # Routes from tfvars (routes to spoke networks via firewall)
+  routes = var.app_gateway_route_table_routes
 
-  # Associate with Gateway subnet
-  subnet_id = module.gateway_subnet[0].subnet_id
+  # Associate with App Gateway subnet
+  subnet_id = module.app_gateway_subnet[0].subnet_id
+
+  # Tags
+  tags = var.tags
 
   depends_on = [
-    module.gateway_subnet
+    module.app_gateway_subnet
   ]
 }
