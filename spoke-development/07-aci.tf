@@ -5,17 +5,6 @@
 # Naming Modules
 # ============================================================================
 
-module "aci_subnet_naming" {
-  source = "../modules/naming"
-
-  resource_type = "snet"
-  workload      = "aci"
-  environment   = var.environment
-  location      = var.location
-  instance      = "001"
-  common_tags   = var.tags
-}
-
 module "aci_naming" {
   source = "../modules/naming"
 
@@ -25,38 +14,6 @@ module "aci_naming" {
   location      = var.location
   instance      = "001"
   common_tags   = var.tags
-}
-
-# ============================================================================
-# ACI Subnet (with delegation)
-# ============================================================================
-
-module "aci_subnet" {
-  count  = local.deploy_aci_subnet ? 1 : 0
-  source = "../modules/subnet"
-
-  subnet_name          = module.aci_subnet_naming.name
-  resource_group_name  = module.rg_spoke.rg_name
-  virtual_network_name = module.spoke_vnet.vnet_name
-  address_prefixes     = [local.aci_subnet]
-
-  # Service endpoints for ACI
-  service_endpoints = [
-    "Microsoft.Storage",
-    "Microsoft.KeyVault",
-    "Microsoft.ContainerRegistry"
-  ]
-
-  # Delegation required for ACI
-  delegation = {
-    name         = "aci-delegation"
-    service_name = "Microsoft.ContainerInstance/containerGroups"
-    actions      = ["Microsoft.Network/virtualNetworks/subnets/action"]
-  }
-
-  depends_on = [
-    module.spoke_vnet
-  ]
 }
 
 # ============================================================================
