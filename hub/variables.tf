@@ -53,12 +53,6 @@ variable "deploy_firewall" {
   default     = true
 }
 
-variable "deploy_bastion" {
-  type        = bool
-  description = "Deploy Azure Bastion"
-  default     = true
-}
-
 variable "deploy_app_gateway" {
   type        = bool
   description = "Deploy Application Gateway"
@@ -115,52 +109,6 @@ variable "firewall_network_rules" {
   }))
   description = "Network rules for Azure Firewall"
   default     = []
-}
-
-# ============================================================================
-# Bastion Configuration
-# ============================================================================
-
-variable "bastion_sku" {
-  type        = string
-  description = "Azure Bastion SKU (Basic or Standard)"
-  default     = "Standard"
-}
-
-variable "bastion_scale_units" {
-  type        = number
-  description = "Number of scale units for Bastion (2-50)"
-  default     = 2
-}
-
-variable "bastion_copy_paste_enabled" {
-  type        = bool
-  description = "Enable copy/paste for Bastion"
-  default     = true
-}
-
-variable "bastion_file_copy_enabled" {
-  type        = bool
-  description = "Enable file copy (Standard SKU only)"
-  default     = false
-}
-
-variable "bastion_ip_connect_enabled" {
-  type        = bool
-  description = "Enable IP connect (Standard SKU only)"
-  default     = false
-}
-
-variable "bastion_tunneling_enabled" {
-  type        = bool
-  description = "Enable tunneling (Standard SKU only)"
-  default     = false
-}
-
-variable "bastion_zones" {
-  type        = list(string)
-  description = "Availability zones for Azure Bastion"
-  default     = ["1", "2", "3"]
 }
 
 # ============================================================================
@@ -310,44 +258,6 @@ variable "app_gateway_request_routing_rules" {
     backend_http_settings_name = "default-http-settings"
     priority                   = 100
   }]
-}
-
-# ============================================================================
-# Network Security Group Rules
-# ============================================================================
-
-variable "management_nsg_rules" {
-  type = list(object({
-    name                       = string
-    priority                   = number
-    direction                  = string
-    access                     = string
-    protocol                   = string
-    source_port_range          = string
-    destination_port_range     = string
-    source_address_prefix      = string
-    destination_address_prefix = string
-    description                = string
-  }))
-  description = "Security rules for Management subnet NSG"
-  default     = []
-}
-
-variable "app_gateway_nsg_rules" {
-  type = list(object({
-    name                       = string
-    priority                   = number
-    direction                  = string
-    access                     = string
-    protocol                   = string
-    source_port_range          = string
-    destination_port_range     = string
-    source_address_prefix      = string
-    destination_address_prefix = string
-    description                = string
-  }))
-  description = "Security rules for Application Gateway subnet NSG"
-  default     = []
 }
 
 # ============================================================================
