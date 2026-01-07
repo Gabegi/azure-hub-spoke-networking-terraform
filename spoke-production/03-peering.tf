@@ -43,6 +43,11 @@ resource "azurerm_virtual_network_peering" "spoke_to_hub" {
   allow_gateway_transit        = false # Spoke doesn't provide gateway
   use_remote_gateways          = false # Set to true if hub has VPN/ExpressRoute gateway
 
+  lifecycle {
+    prevent_destroy = false
+    ignore_changes  = [tags]
+  }
+
   depends_on = [
     module.spoke_vnet
   ]
@@ -63,6 +68,11 @@ resource "azurerm_virtual_network_peering" "hub_to_spoke" {
   allow_forwarded_traffic      = true  # Allow hub to forward traffic to spoke
   allow_gateway_transit        = false # Set to true if hub has VPN/ExpressRoute gateway
   use_remote_gateways          = false # Hub provides gateway, doesn't use remote
+
+  lifecycle {
+    prevent_destroy = false
+    ignore_changes  = [tags]
+  }
 
   depends_on = [
     module.spoke_vnet

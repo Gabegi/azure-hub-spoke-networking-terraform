@@ -61,6 +61,11 @@ resource "azurerm_container_group" "aci" {
     }
   )
 
+  lifecycle {
+    prevent_destroy = false
+    ignore_changes  = [tags]
+  }
+
   depends_on = [
     module.aci_subnet,
     module.aci_nsg
