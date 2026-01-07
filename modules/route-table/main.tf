@@ -1,12 +1,31 @@
 # modules/route-table/main.tf
 # Route Table module for custom routing configurations
 
+# ============================================================================
+# Internal Naming Module
+# ============================================================================
+
+module "route_table_naming" {
+  source = "../naming"
+
+  resource_type = var.resource_type
+  workload      = var.workload
+  environment   = var.environment
+  location      = var.location
+  instance      = var.instance
+  common_tags   = var.common_tags
+}
+
+# ============================================================================
+# Route Table
+# ============================================================================
+
 resource "azurerm_route_table" "route_table" {
-  name                          = var.route_table_name
+  name                          = module.route_table_naming.name
   location                      = var.location
   resource_group_name           = var.resource_group_name
   disable_bgp_route_propagation = var.disable_bgp_route_propagation
-  tags                          = var.tags
+  tags                          = module.route_table_naming.tags
 }
 
 # Routes
