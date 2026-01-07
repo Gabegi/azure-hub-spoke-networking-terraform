@@ -56,7 +56,9 @@ resource "azurerm_public_ip" "firewall" {
   # Prevent accidental deletion in production
   lifecycle {
     prevent_destroy = false # Set to true for production
+    ignore_changes = [tags]
   }
+  
 }
 
 # Optional: Additional Public IP addresses for SNAT
@@ -74,6 +76,7 @@ resource "azurerm_public_ip" "firewall_management" {
 
   lifecycle {
     prevent_destroy = false
+    ignore_changes = [tags]
   }
 }
 
@@ -156,6 +159,7 @@ resource "azurerm_firewall_policy" "policy" {
 
   lifecycle {
     prevent_destroy = false
+    ignore_changes = [tags]
   }
 }
 
@@ -206,6 +210,7 @@ resource "azurerm_firewall" "firewall" {
   # Prevent accidental deletion
   lifecycle {
     prevent_destroy = false # Set to true for production
+    ignore_changes = [tags]
   }
 
   depends_on = [

@@ -40,5 +40,6 @@ resource "azurerm_virtual_network" "vnet" {
   # Prevent accidental deletion
   lifecycle {
     prevent_destroy = false  # Set to true for production
+    ignore_changes = [tags]
   }
 }

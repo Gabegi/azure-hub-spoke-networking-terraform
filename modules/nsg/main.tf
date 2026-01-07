@@ -176,5 +176,6 @@ resource "azurerm_application_security_group" "asg" {
 
   lifecycle {
     prevent_destroy = false
+    ignore_changes = [tags]
   }
 }

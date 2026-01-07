@@ -28,17 +28,18 @@ resource "azurerm_resource_group" "rg" {
   # Prevent accidental deletion in production
   lifecycle {
     prevent_destroy = false # Set to true for production
+    ignore_changes = [tags]
   }
 }
 
 # # Optional: Apply resource lock to prevent deletion
-# resource "azurerm_management_lock" "rg_lock" {
-#   count = var.enable_resource_lock ? 1 : 0
+resource "azurerm_management_lock" "rg_lock" {
+  count = var.enable_resource_lock ? 1 : 0
 
-#   name       = "${module.rg_naming.name}-lock"
-#   scope      = azurerm_resource_group.rg.id
-#   lock_level = var.lock_level # CanNotDelete or ReadOnly
-#   notes      = var.lock_notes
+  name       = "${module.rg_naming.name}-lock"
+  scope      = azurerm_resource_group.rg.id
+  lock_level = var.lock_level # CanNotDelete or ReadOnly
+  notes      = var.lock_notes
 
-#   depends_on = [azurerm_resource_group.rg]
-# }
+  depends_on = [azurerm_resource_group.rg]
+}

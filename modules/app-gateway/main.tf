@@ -41,6 +41,10 @@ resource "azurerm_public_ip" "app_gateway" {
   zones               = var.availability_zones
 
   tags = module.app_gateway_pip_naming.tags
+
+  lifecycle {
+    ignore_changes = [tags]
+  }
 }
 
 # Application Gateway
@@ -185,6 +189,8 @@ resource "azurerm_application_gateway" "main" {
 
   lifecycle {
     prevent_destroy = false
+    ignore_changes = [tags]
+  
   }
 }
 
