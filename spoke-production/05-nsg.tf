@@ -1,17 +1,17 @@
-# spoke-production/03-nsg.tf
+# spoke-production/05-nsg.tf
 # Network Security Groups for Production Spoke
 
 # ============================================================================
-# ACI Subnet NSG
+# Function App Subnet NSG
 # ============================================================================
 
-module "aci_nsg" {
-  count  = local.deploy_aci_subnet ? 1 : 0
+module "function_nsg" {
+  count  = local.deploy_function_subnet ? 1 : 0
   source = "../modules/nsg"
 
   # Naming (module handles naming internally)
   resource_type = "nsg"
-  workload      = "aci"
+  workload      = "function"
   environment   = var.environment
   location      = var.location
   instance      = "001"
@@ -21,10 +21,10 @@ module "aci_nsg" {
   resource_group_name = module.rg_spoke.rg_name
 
   # Security rules from variables
-  security_rules = var.aci_nsg_rules
+  security_rules = var.function_nsg_rules
 
-  # Associate with ACI subnet
-  subnet_id = module.aci_subnet[0].subnet_id
+  # Associate with Function App subnet
+  subnet_id = module.function_subnet[0].subnet_id
 
   # Flow Logs
   enable_flow_logs                    = local.enable_flow_logs
@@ -42,6 +42,6 @@ module "aci_nsg" {
   enable_diagnostic_settings = local.enable_diagnostics
 
   depends_on = [
-    module.aci_subnet
+    module.function_subnet
   ]
 }
