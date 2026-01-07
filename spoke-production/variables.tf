@@ -283,7 +283,7 @@ variable "storage_account_id" {
 variable "enable_resource_lock" {
   type        = bool
   description = "Enable resource lock on resource group (recommended for production)"
-  default     = true
+  default     = false
 }
 
 variable "lock_level" {

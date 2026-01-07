@@ -108,4 +108,4 @@ storage_replication_type     = "LRS"  # LRS, GRS, RAGRS, ZRS, GZRS, RAGZRS
 # Resource Lock Configuration
 # ============================================================================
 
-enable_resource_lock = true  # Enabled by default for production resources
+enable_resource_lock = false  # Enabled by default for production resources

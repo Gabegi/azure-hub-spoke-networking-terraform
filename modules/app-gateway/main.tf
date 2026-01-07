@@ -43,7 +43,8 @@ resource "azurerm_public_ip" "app_gateway" {
   tags = module.app_gateway_pip_naming.tags
 
   lifecycle {
-    ignore_changes = [tags]
+    prevent_destroy = false
+    ignore_changes  = [tags]
   }
 }
 

@@ -359,4 +359,4 @@ storage_replication_type     = "GRS"  # Geo-redundant for production
 # Resource Lock Configuration
 # ============================================================================
 
-enable_resource_lock = true  # CRITICAL: Enabled for production resources
+enable_resource_lock = false  # CRITICAL: Enabled for production resources

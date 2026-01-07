@@ -26,6 +26,11 @@ resource "azurerm_route_table" "route_table" {
   resource_group_name           = var.resource_group_name
   disable_bgp_route_propagation = var.disable_bgp_route_propagation
   tags                          = module.route_table_naming.tags
+
+  lifecycle {
+    prevent_destroy = false
+    ignore_changes  = [tags]
+  }
 }
 
 # Routes

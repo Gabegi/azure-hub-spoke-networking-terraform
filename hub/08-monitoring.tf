@@ -13,7 +13,8 @@ resource "azurerm_log_analytics_workspace" "hub" {
   tags = var.tags
 
   lifecycle {
-    prevent_destroy = false # Set to true for production
+    prevent_destroy = false
+    ignore_changes  = [tags]
   }
 }
 
@@ -32,5 +33,6 @@ resource "azurerm_storage_account" "flow_logs" {
 
   lifecycle {
     prevent_destroy = false
+    ignore_changes  = [tags]
   }
 }

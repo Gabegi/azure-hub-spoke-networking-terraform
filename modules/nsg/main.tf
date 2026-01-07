@@ -30,7 +30,8 @@ resource "azurerm_network_security_group" "nsg" {
 
   # Prevent accidental deletion in production
   lifecycle {
-    prevent_destroy = false # Set to true for production
+    prevent_destroy = false
+    ignore_changes  = [tags]
   }
 }
 
