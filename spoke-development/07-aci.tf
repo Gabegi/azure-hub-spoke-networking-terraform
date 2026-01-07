@@ -20,8 +20,8 @@ resource "azurerm_container_group" "aci" {
   restart_policy = "Always"
 
   container {
-    name   = "aci-helloworld"
-    image  = "mcr.microsoft.com/azuredocs/aci-helloworld:latest"
+    name   = "alpine-net"
+    image  = "alpine:latest"
     cpu    = "0.5"
     memory = "1.0"
 
@@ -34,6 +34,8 @@ resource "azurerm_container_group" "aci" {
       "ENVIRONMENT" = var.environment
       "SPOKE"       = "development"
     }
+
+    commands = ["sleep", "3600"]
   }
 
   tags = merge(
