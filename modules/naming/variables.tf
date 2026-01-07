@@ -21,7 +21,9 @@ variable "resource_type" {
       "vm",      # Virtual Machine
       "nic",     # Network Interface
       "agw",     # Application Gateway
-      "aci"      # Azure Container Instance
+      "aci",     # Azure Container Instance
+      "asp",     # App Service Plan
+      "func"     # Function App
     ], var.resource_type)
     error_message = "Must use approved Microsoft abbreviations"
   }
@@ -37,8 +39,8 @@ variable "environment" {
   description = "Environment name"
 
   validation {
-    condition     = contains(["prod", "dev", "production"], var.environment)
-    error_message = "Environment must be prod, dev, or production"
+    condition     = contains(["prod", "dev", "production", "shared"], var.environment)
+    error_message = "Environment must be prod, dev, production, or shared"
   }
 }
 

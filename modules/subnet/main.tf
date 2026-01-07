@@ -30,6 +30,5 @@ resource "azurerm_subnet" "subnet" {
 
   lifecycle {
     prevent_destroy = false
-    ignore_changes  = [tags]
   }
 }

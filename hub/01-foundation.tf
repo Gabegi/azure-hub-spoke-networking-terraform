@@ -10,7 +10,7 @@ module "rg_networking" {
 
   # Naming (module handles naming internally)
   resource_type = "rg"
-  workload      = "networking"
+  workload      = "hub"
   environment   = var.environment
   location      = var.location
   instance      = "001"

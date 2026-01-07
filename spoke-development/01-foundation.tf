@@ -10,7 +10,7 @@ module "rg_spoke" {
 
   # Naming (module handles naming internally)
   resource_type = "rg"
-  workload      = "spoke-development"
+  workload      = "spoke"
   environment   = var.environment
   location      = var.location
   instance      = "001"

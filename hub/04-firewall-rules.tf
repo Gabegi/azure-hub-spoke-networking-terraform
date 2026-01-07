@@ -37,7 +37,6 @@ resource "azurerm_firewall_policy_rule_collection_group" "hub_rules" {
 
   lifecycle {
     prevent_destroy = false
-    ignore_changes  = [tags]
   }
 
   depends_on = [
