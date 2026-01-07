@@ -8,7 +8,7 @@
 # ============================================================================
 
 resource "azurerm_firewall_policy_rule_collection_group" "hub_rules" {
-  count = local.deploy_firewall ? 1 : 0
+  count = var.deploy_firewall ? 1 : 0
 
   name               = "NetworkRuleCollectionGroup"
   firewall_policy_id = module.firewall[0].firewall_policy_id

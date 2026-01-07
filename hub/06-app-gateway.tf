@@ -6,7 +6,7 @@
 # ============================================================================
 
 module "app_gateway" {
-  count  = local.deploy_app_gateway ? 1 : 0
+  count  = var.deploy_app_gateway ? 1 : 0
   source = "../modules/app-gateway"
 
   # Naming (module handles naming internally)
@@ -43,7 +43,7 @@ module "app_gateway" {
   request_routing_rules    = var.app_gateway_request_routing_rules
 
   # Monitoring
-  enable_diagnostic_settings = local.enable_diagnostics
+  enable_diagnostic_settings = var.enable_diagnostics
   log_analytics_workspace_id = azurerm_log_analytics_workspace.hub.id
 
   depends_on = [

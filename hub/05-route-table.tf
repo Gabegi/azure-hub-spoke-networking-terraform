@@ -6,7 +6,7 @@
 # ============================================================================
 
 module "app_gateway_route_table" {
-  count  = local.deploy_app_gateway ? 1 : 0
+  count  = var.deploy_app_gateway ? 1 : 0
   source = "../modules/route-table"
 
   # Naming (module handles naming internally)

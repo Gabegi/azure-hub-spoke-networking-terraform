@@ -6,7 +6,7 @@
 # ============================================================================
 
 module "firewall" {
-  count  = local.deploy_firewall ? 1 : 0
+  count  = var.deploy_firewall ? 1 : 0
   source = "../modules/firewall"
 
   # Naming (module handles naming internally)
@@ -39,7 +39,7 @@ module "firewall" {
   availability_zones = var.availability_zones
 
   # Monitoring
-  enable_diagnostic_settings = local.enable_diagnostics
+  enable_diagnostic_settings = var.enable_diagnostics
   log_analytics_workspace_id = azurerm_log_analytics_workspace.hub.id
 
   depends_on = [

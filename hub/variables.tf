@@ -43,6 +43,30 @@ variable "hub_address_space" {
   default     = "10.0.0.0/16"
 }
 
+variable "firewall_subnet" {
+  type        = string
+  description = "CIDR block for Azure Firewall subnet"
+  default     = "10.0.0.0/26"
+}
+
+variable "app_gateway_subnet" {
+  type        = string
+  description = "CIDR block for Application Gateway subnet"
+  default     = "10.0.1.0/27"
+}
+
+variable "gateway_subnet" {
+  type        = string
+  description = "CIDR block for VPN/ExpressRoute Gateway subnet"
+  default     = "10.0.2.0/26"
+}
+
+variable "management_subnet" {
+  type        = string
+  description = "CIDR block for Management subnet"
+  default     = "10.0.3.0/27"
+}
+
 # ============================================================================
 # Feature Flags
 # ============================================================================
