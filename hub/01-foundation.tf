@@ -8,9 +8,13 @@
 module "rg_networking" {
   source = "../modules/resource-group"
 
-  rg_name  = "rg-networking-${var.environment}-${var.location}-001"
-  location = var.location
-  tags     = var.tags
+  # Naming (module handles naming internally)
+  resource_type = "rg"
+  workload      = "networking"
+  environment   = var.environment
+  location      = var.location
+  instance      = "001"
+  common_tags   = var.tags
 
   # # Enable resource lock for production (only enable when not testing)
   # enable_resource_lock = var.environment == "prod" ? var.enable_resource_lock : false

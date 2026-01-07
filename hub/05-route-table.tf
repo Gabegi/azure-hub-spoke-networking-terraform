@@ -9,9 +9,13 @@ module "app_gateway_route_table" {
   count  = local.deploy_app_gateway ? 1 : 0
   source = "../modules/route-table"
 
-  # Naming
-  route_table_name = "route-appgw-${var.environment}-${var.location}-001"
-  location         = var.location
+  # Naming (module handles naming internally)
+  resource_type = "route"
+  workload      = "appgw"
+  environment   = var.environment
+  location      = var.location
+  instance      = "001"
+  common_tags   = var.tags
 
   # Network Configuration
   resource_group_name = module.rg_networking.rg_name
@@ -24,9 +28,6 @@ module "app_gateway_route_table" {
 
   # Associate with App Gateway subnet
   subnet_id = module.app_gateway_subnet[0].subnet_id
-
-  # Tags
-  tags = var.tags
 
   depends_on = [
     module.app_gateway_subnet

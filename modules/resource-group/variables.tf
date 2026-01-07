@@ -1,13 +1,23 @@
 # modules/resource-group/variables.tf
 
-variable "rg_name" {
-  type        = string
-  description = "Name of the resource group"
+# ============================================================================
+# Naming Variables (for internal naming module)
+# ============================================================================
 
-  validation {
-    condition     = can(regex("^[a-zA-Z0-9][a-zA-Z0-9-_.()]{0,88}[a-zA-Z0-9_()]$", var.rg_name))
-    error_message = "Resource group name must be 1-90 characters and contain only alphanumeric, hyphens, underscores, periods, or parentheses"
-  }
+variable "resource_type" {
+  type        = string
+  description = "Azure resource type abbreviation (e.g., 'rg' for Resource Group)"
+  default     = "rg"
+}
+
+variable "workload" {
+  type        = string
+  description = "Workload or application name"
+}
+
+variable "environment" {
+  type        = string
+  description = "Environment name (e.g., 'dev', 'prod', 'staging')"
 }
 
 variable "location" {
@@ -15,15 +25,16 @@ variable "location" {
   description = "Azure region for the resource group (e.g., westeurope, eastus)"
 }
 
-variable "tags" {
-  type        = map(string)
-  description = "Tags to apply to the resource group"
-  default     = {}
+variable "instance" {
+  type        = string
+  description = "Instance number (e.g., '001', '002')"
+  default     = "001"
+}
 
-  validation {
-    condition     = length(var.tags) <= 50
-    error_message = "Azure supports a maximum of 50 tags per resource"
-  }
+variable "common_tags" {
+  type        = map(string)
+  description = "Common tags to merge with module-generated tags"
+  default     = {}
 }
 
 # ============================================================================

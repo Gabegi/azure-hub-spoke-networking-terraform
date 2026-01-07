@@ -1,10 +1,29 @@
 # modules/resource-group/main.tf
 # Resource Group module - Azure resource container
 
+# ============================================================================
+# Internal Naming Module
+# ============================================================================
+
+module "rg_naming" {
+  source = "../naming"
+
+  resource_type = var.resource_type
+  workload      = var.workload
+  environment   = var.environment
+  location      = var.location
+  instance      = var.instance
+  common_tags   = var.common_tags
+}
+
+# ============================================================================
+# Resource Group
+# ============================================================================
+
 resource "azurerm_resource_group" "rg" {
-  name     = var.rg_name
+  name     = module.rg_naming.name
   location = var.location
-  tags     = var.tags
+  tags     = module.rg_naming.tags
 
   # Prevent accidental deletion in production
   lifecycle {
@@ -16,7 +35,7 @@ resource "azurerm_resource_group" "rg" {
 resource "azurerm_management_lock" "rg_lock" {
   count = var.enable_resource_lock ? 1 : 0
 
-  name       = "${var.rg_name}-lock"
+  name       = "${module.rg_naming.name}-lock"
   scope      = azurerm_resource_group.rg.id
   lock_level = var.lock_level # CanNotDelete or ReadOnly
   notes      = var.lock_notes

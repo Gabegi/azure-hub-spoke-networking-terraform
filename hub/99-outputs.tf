@@ -43,10 +43,7 @@ output "firewall_subnet_id" {
   description = "Firewall subnet ID"
 }
 
-output "management_subnet_id" {
-  value       = local.deploy_mgmt ? module.management_subnet[0].subnet_id : null
-  description = "Management subnet ID (if deployed)"
-}
+# Management subnet output removed - subnet not currently deployed
 
 output "app_gateway_subnet_id" {
   value       = local.deploy_app_gateway ? module.app_gateway_subnet[0].subnet_id : null
