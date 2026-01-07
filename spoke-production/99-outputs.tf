@@ -58,17 +58,17 @@ output "aci_route_table_id" {
 # ============================================================================
 
 output "aci_id" {
-  value       = local.deploy_aci_subnet ? module.aci[0].aci_id : null
+  value       = var.deploy_aci_subnet ? azurerm_container_group.aci[0].id : null
   description = "ACI container group ID (if deployed)"
 }
 
 output "aci_ip_address" {
-  value       = local.deploy_aci_subnet ? module.aci[0].aci_ip_address : null
+  value       = var.deploy_aci_subnet ? azurerm_container_group.aci[0].ip_address : null
   description = "ACI container group IP address (if deployed)"
 }
 
 output "aci_fqdn" {
-  value       = local.deploy_aci_subnet ? module.aci[0].aci_fqdn : null
+  value       = var.deploy_aci_subnet ? azurerm_container_group.aci[0].fqdn : null
   description = "ACI container group FQDN (if deployed)"
 }
 
