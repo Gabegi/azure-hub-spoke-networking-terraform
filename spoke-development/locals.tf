@@ -4,10 +4,10 @@
 locals {
   # Network Configuration
   spoke_address_space = var.spoke_address_space
-  aci_subnet          = "10.1.0.0/24"  # Simplified to single ACI subnet
+  function_subnet     = "10.1.0.0/24"  # Function App subnet (reusing ACI subnet range)
 
   # Feature Flags
-  deploy_aci_subnet = var.deploy_aci_subnet
+  deploy_function_subnet = var.deploy_function_subnet
 
   # Monitoring Configuration
   enable_diagnostics        = var.enable_diagnostics

@@ -24,14 +24,14 @@ module "spoke_vnet" {
 }
 
 # ============================================================================
-# ACI Subnet Naming
+# Function App Subnet Naming
 # ============================================================================
 
-module "aci_subnet_naming" {
+module "function_subnet_naming" {
   source = "../modules/naming"
 
   resource_type = "snet"
-  workload      = "aci"
+  workload      = "function"
   environment   = var.environment
   location      = var.location
   instance      = "001"
@@ -42,28 +42,29 @@ module "aci_subnet_naming" {
 # Spoke Subnets
 # ============================================================================
 
-# ACI Subnet (for Azure Container Instances)
-module "aci_subnet" {
-  count  = local.deploy_aci_subnet ? 1 : 0
+# Function App Subnet (for Azure Function Apps with VNet Integration)
+module "function_subnet" {
+  count  = local.deploy_function_subnet ? 1 : 0
   source = "../modules/subnet"
 
-  subnet_name          = module.aci_subnet_naming.name
+  subnet_name          = module.function_subnet_naming.name
   resource_group_name  = module.rg_spoke.rg_name
   virtual_network_name = module.spoke_vnet.vnet_name
-  address_prefixes     = [local.aci_subnet]
+  address_prefixes     = [local.function_subnet]
 
-  # Service endpoints for ACI
+  # Service endpoints for Function Apps
   service_endpoints = [
     "Microsoft.Storage",
-    "Microsoft.KeyVault",
-    "Microsoft.ContainerRegistry"
+    "Microsoft.Web"
   ]
 
-  # Delegation required for ACI
+  # Delegation required for Function App VNet Integration
   delegation = {
-    name         = "aci-delegation"
-    service_name = "Microsoft.ContainerInstance/containerGroups"
-    actions      = ["Microsoft.Network/virtualNetworks/subnets/action"]
+    name         = "function-delegation"
+    service_name = "Microsoft.Web/serverFarms"
+    actions = [
+      "Microsoft.Network/virtualNetworks/subnets/action"
+    ]
   }
 
   depends_on = [module.spoke_vnet]
