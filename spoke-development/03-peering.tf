@@ -1,38 +1,12 @@
-# spoke-development/05-peering.tf
+# spoke-development/03-peering.tf
 # VNet Peering between Development Spoke and Hub
-
-# ============================================================================
-# Naming Modules
-# ============================================================================
-
-module "spoke_to_hub_peering_naming" {
-  source = "../modules/naming"
-
-  resource_type = "peer"
-  workload      = "development-to-hub"
-  environment   = var.environment
-  location      = var.location
-  instance      = "001"
-  common_tags   = var.tags
-}
-
-module "hub_to_spoke_peering_naming" {
-  source = "../modules/naming"
-
-  resource_type = "peer"
-  workload      = "hub-to-development"
-  environment   = var.environment
-  location      = var.location
-  instance      = "001"
-  common_tags   = var.tags
-}
 
 # ============================================================================
 # VNet Peering: Spoke to Hub
 # ============================================================================
 
 resource "azurerm_virtual_network_peering" "spoke_to_hub" {
-  name                      = module.spoke_to_hub_peering_naming.name
+  name                      = "peer-development-to-hub-${var.environment}-${var.location}-001"
   resource_group_name       = module.rg_spoke.rg_name
   virtual_network_name      = module.spoke_vnet.vnet_name
   remote_virtual_network_id = local.hub_vnet_id
@@ -53,7 +27,7 @@ resource "azurerm_virtual_network_peering" "spoke_to_hub" {
 # ============================================================================
 
 resource "azurerm_virtual_network_peering" "hub_to_spoke" {
-  name                      = module.hub_to_spoke_peering_naming.name
+  name                      = "peer-hub-to-development-${var.environment}-${var.location}-001"
   resource_group_name       = var.hub_resource_group_name
   virtual_network_name      = local.hub_vnet_name
   remote_virtual_network_id = module.spoke_vnet.vnet_id

@@ -1,13 +1,40 @@
 # modules/route-table/variables.tf
 
-variable "route_table_name" {
+# ============================================================================
+# Naming Variables (for internal naming module)
+# ============================================================================
+
+variable "resource_type" {
   type        = string
-  description = "Name of the route table"
+  description = "Azure resource type abbreviation (e.g., 'route' for Route Table)"
+  default     = "route"
+}
+
+variable "workload" {
+  type        = string
+  description = "Workload or application name"
+}
+
+variable "environment" {
+  type        = string
+  description = "Environment name (e.g., 'dev', 'prod', 'staging')"
 }
 
 variable "location" {
   type        = string
   description = "Azure region for the route table"
+}
+
+variable "instance" {
+  type        = string
+  description = "Instance number (e.g., '001', '002')"
+  default     = "001"
+}
+
+variable "common_tags" {
+  type        = map(string)
+  description = "Common tags to merge with module-generated tags"
+  default     = {}
 }
 
 variable "resource_group_name" {

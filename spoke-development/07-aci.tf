@@ -2,27 +2,12 @@
 # Azure Container Instances infrastructure for Development spoke
 
 # ============================================================================
-# Naming Modules
-# ============================================================================
-
-module "aci_naming" {
-  source = "../modules/naming"
-
-  resource_type = "aci"
-  workload      = "test"
-  environment   = var.environment
-  location      = var.location
-  instance      = "001"
-  common_tags   = var.tags
-}
-
-# ============================================================================
 # Azure Container Instance
 # ============================================================================
 
 resource "azurerm_container_group" "aci" {
   count               = local.deploy_aci_subnet ? 1 : 0
-  name                = module.aci_naming.name
+  name                = "aci-test-${var.environment}-${var.location}-001"
   location            = var.location
   resource_group_name = module.rg_spoke.rg_name
   os_type             = "Linux"
@@ -52,7 +37,7 @@ resource "azurerm_container_group" "aci" {
   }
 
   tags = merge(
-    module.aci_naming.tags,
+    var.tags,
     {
       Purpose = "Connectivity Testing"
       Usage   = "Test spoke-to-spoke communication via hub firewall"

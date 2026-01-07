@@ -2,30 +2,15 @@
 # Foundation resources: Resource Group
 
 # ============================================================================
-# Naming Modules
-# ============================================================================
-
-module "rg_naming" {
-  source = "../modules/naming"
-
-  resource_type = "rg"
-  workload      = "networking"
-  environment   = var.environment
-  location      = var.location
-  instance      = "001"
-  common_tags   = var.tags
-}
-
-# ============================================================================
 # Resource Group
 # ============================================================================
 
 module "rg_networking" {
   source = "../modules/resource-group"
 
-  rg_name  = module.rg_naming.name
+  rg_name  = "rg-networking-${var.environment}-${var.location}-001"
   location = var.location
-  tags     = module.rg_naming.tags
+  tags     = var.tags
 
   # # Enable resource lock for production (only enable when not testing)
   # enable_resource_lock = var.environment == "prod" ? var.enable_resource_lock : false
