@@ -26,10 +26,6 @@ resource "azurerm_route_table" "route_table" {
   resource_group_name           = var.resource_group_name
   disable_bgp_route_propagation = var.disable_bgp_route_propagation
   tags                          = module.route_table_naming.tags
-
-  lifecycle {
-    ignore_changes = [tags]
-  }
 }
 
 # Routes
@@ -42,18 +38,10 @@ resource "azurerm_route" "routes" {
   address_prefix         = each.value.address_prefix
   next_hop_type          = each.value.next_hop_type
   next_hop_in_ip_address = try(each.value.next_hop_in_ip_address, null)
-
-  lifecycle {
-    ignore_changes = [tags]
-  }
 }
 
 # Associate route table with subnet
 resource "azurerm_subnet_route_table_association" "route_table_association" {
   subnet_id      = var.subnet_id
   route_table_id = azurerm_route_table.route_table.id
-
-  lifecycle {
-    ignore_changes = [tags]
-  }
 }

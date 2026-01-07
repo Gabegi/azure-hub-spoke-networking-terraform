@@ -20,8 +20,8 @@ resource "azurerm_container_group" "aci" {
   restart_policy = "Always"
 
   container {
-    name   = "alpine-net"
-    image  = "alpine:latest"
+    name   = "app-dev"
+    image  = "nicolaka/netshoot:latest"
     cpu    = "0.5"
     memory = "1.0"
 
