@@ -101,6 +101,8 @@ module "function_app" {
   http2_enabled          = true
   minimum_tls_version    = "1.2"
 
+  
+
   # Elastic Premium Settings
   elastic_instance_minimum  = 1
   pre_warmed_instance_count = 1
