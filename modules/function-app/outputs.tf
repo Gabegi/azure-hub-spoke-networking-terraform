@@ -21,6 +21,6 @@ output "function_app_outbound_ip_addresses" {
 }
 
 output "function_app_possible_outbound_ip_addresses" {
-  value       = zurerm_linux_function_app.function[0].possible_outbound_ip_addresses
+  value       = azurerm_linux_function_app.function[0].possible_outbound_ip_addresses
   description = "Possible outbound IP addresses of the function app"
 }
