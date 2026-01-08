@@ -2,16 +2,16 @@
 # Route Table for Production Spoke - Forces all traffic through Hub Firewall
 
 # ============================================================================
-# ACI Subnet Route Table
+# Function App Subnet Route Table
 # ============================================================================
 
-module "aci_route_table" {
-  count  = local.deploy_aci_subnet ? 1 : 0
+module "function_route_table" {
+  count  = local.deploy_function_subnet ? 1 : 0
   source = "../modules/route-table"
 
   # Naming (module handles naming internally)
   resource_type = "route"
-  workload      = "aci"
+  workload      = "function"
   environment   = var.environment
   location      = var.location
   instance      = "001"
@@ -26,10 +26,10 @@ module "aci_route_table" {
   # Routes from tfvars
   routes = var.route_table_routes
 
-  # Associate with ACI subnet
-  subnet_id = module.aci_subnet[0].subnet_id
+  # Associate with Function App subnet
+  subnet_id = module.function_subnet[0].subnet_id
 
   depends_on = [
-    module.aci_subnet
+    module.function_subnet
   ]
 }

@@ -226,3 +226,19 @@ variable "app_settings" {
   description = "Application settings for the function app"
   default     = {}
 }
+
+# ============================================================================
+# CORS Configuration
+# ============================================================================
+
+variable "cors_allowed_origins" {
+  type        = list(string)
+  description = "List of allowed CORS origins"
+  default     = null
+}
+
+variable "cors_support_credentials" {
+  type        = bool
+  description = "Enable CORS support for credentials"
+  default     = false
+}

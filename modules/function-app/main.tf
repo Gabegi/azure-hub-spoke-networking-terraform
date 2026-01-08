@@ -54,6 +54,14 @@ resource "azurerm_linux_function_app" "function" {
       dotnet_version = var.dotnet_version
       java_version   = var.java_version
     }
+
+    dynamic "cors" {
+      for_each = var.cors_allowed_origins != null ? [1] : []
+      content {
+        allowed_origins     = var.cors_allowed_origins
+        support_credentials = var.cors_support_credentials
+      }
+    }
   }
 
   app_settings = merge(
@@ -106,11 +114,18 @@ resource "azurerm_windows_function_app" "function" {
     runtime_scale_monitoring_enabled       = var.runtime_scale_monitoring_enabled
 
     application_stack {
-      python_version      = var.python_version
       node_version        = var.node_version
       dotnet_version      = var.dotnet_version
       java_version        = var.java_version
       powershell_core_version = var.powershell_core_version
+    }
+
+    dynamic "cors" {
+      for_each = var.cors_allowed_origins != null ? [1] : []
+      content {
+        allowed_origins     = var.cors_allowed_origins
+        support_credentials = var.cors_support_credentials
+      }
     }
   }
 

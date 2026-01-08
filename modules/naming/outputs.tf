@@ -1,7 +1,7 @@
 # modules/naming/outputs.tf
 
 output "name" {
-  value       = local.base_name
+  value       = var.resource_type == "st" ? local.storage_name : local.base_name
   description = "Generated resource name following Microsoft conventions"
 }
 

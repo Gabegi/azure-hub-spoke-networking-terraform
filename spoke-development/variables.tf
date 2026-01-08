@@ -66,9 +66,9 @@ variable "deploy_app_subnet" {
   default     = true
 }
 
-variable "deploy_aci_subnet" {
+variable "deploy_function_subnet" {
   type        = bool
-  description = "Deploy Azure Container Instance subnet"
+  description = "Deploy Function App subnet"
   default     = false
 }
 
@@ -162,7 +162,7 @@ variable "app_nsg_rules" {
   default     = []
 }
 
-variable "aci_nsg_rules" {
+variable "function_nsg_rules" {
   type = list(object({
     name                       = string
     priority                   = number

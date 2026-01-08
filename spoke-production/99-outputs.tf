@@ -38,39 +38,24 @@ output "vnet_address_space" {
 # ACI Subnet Outputs
 # ============================================================================
 
-output "aci_subnet_id" {
-  value       = local.deploy_aci_subnet ? module.aci_subnet[0].subnet_id : null
+output "function_subnet_id" {
+  value       = local.deploy_function_subnet ? module.function_subnet[0].subnet_id : null
   description = "ACI subnet ID (if deployed)"
 }
 
-output "aci_nsg_id" {
-  value       = local.deploy_aci_subnet ? module.aci_nsg[0].nsg_id : null
+output "function_nsg_id" {
+  value       = local.deploy_function_subnet ? module.function_nsg[0].nsg_id : null
   description = "ACI NSG ID (if deployed)"
 }
 
-output "aci_route_table_id" {
-  value       = local.deploy_aci_subnet ? module.aci_route_table[0].route_table_id : null
+output "function_route_table_id" {
+  value       = local.deploy_function_subnet ? module.function_route_table[0].route_table_id : null
   description = "ACI route table ID (if deployed)"
 }
 
 # ============================================================================
 # ACI Container Instance Outputs
 # ============================================================================
-
-output "aci_id" {
-  value       = var.deploy_aci_subnet ? azurerm_container_group.aci[0].id : null
-  description = "ACI container group ID (if deployed)"
-}
-
-output "aci_ip_address" {
-  value       = var.deploy_aci_subnet ? azurerm_container_group.aci[0].ip_address : null
-  description = "ACI container group IP address (if deployed)"
-}
-
-output "aci_fqdn" {
-  value       = var.deploy_aci_subnet ? azurerm_container_group.aci[0].fqdn : null
-  description = "ACI container group FQDN (if deployed)"
-}
 
 # ============================================================================
 # Peering Outputs
@@ -95,7 +80,7 @@ output "spoke_summary" {
     resource_group     = module.rg_spoke.rg_name
     vnet_name          = module.spoke_vnet.vnet_name
     vnet_address_space = local.spoke_address_space
-    aci_deployed       = local.deploy_aci_subnet
+    aci_deployed       = local.deploy_function_subnet
     forced_tunneling   = local.enable_forced_tunneling
     resource_lock      = var.enable_resource_lock
     peering_to_hub     = azurerm_virtual_network_peering.spoke_to_hub.name

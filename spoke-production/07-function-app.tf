@@ -88,8 +88,8 @@ module "function_app" {
 
   # OS and Runtime
   os_type                  = "Linux"
-  functions_worker_runtime = "python"
-  python_version           = "3.11"
+  functions_worker_runtime = "dotnet"
+  dotnet_version           = "8.0"
 
   # Security
   https_only                    = true
@@ -105,10 +105,17 @@ module "function_app" {
   elastic_instance_minimum  = 1
   pre_warmed_instance_count = 1
 
+  # CORS Configuration for testing directly in the portal
+  cors_allowed_origins     = ["https://portal.azure.com"]
+  cors_support_credentials = true
+
   # Application Settings
   app_settings = {
-    "FUNCTIONS_EXTENSION_VERSION" = "~4"
-    "ENVIRONMENT"                 = var.environment
+    "FUNCTIONS_EXTENSION_VERSION"                 = "~4"
+    "ENVIRONMENT"                                 = var.environment
+    "WEBSITE_CONTENTSHARE"                        = "func-app-prod-content"
+    "WEBSITE_RUN_FROM_PACKAGE"                    = "1"
+    "WEBSITE_USE_PLACEHOLDER_DOTNETISOLATED"      = "1"
   }
 
   depends_on = [

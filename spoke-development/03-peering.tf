@@ -19,7 +19,6 @@ resource "azurerm_virtual_network_peering" "spoke_to_hub" {
 
   lifecycle {
     prevent_destroy = false
-    ignore_changes  = [tags]
   }
 
   depends_on = [
@@ -45,7 +44,6 @@ resource "azurerm_virtual_network_peering" "hub_to_spoke" {
 
   lifecycle {
     prevent_destroy = false
-    ignore_changes  = [tags]
   }
 
   depends_on = [
