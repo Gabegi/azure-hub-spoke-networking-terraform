@@ -21,7 +21,7 @@ module "app_gateway_route_table" {
   resource_group_name = module.rg_networking.rg_name
 
   # Disable BGP route propagation
-  disable_bgp_route_propagation = true
+  bgp_route_propagation_enabled = false
 
   # Routes from tfvars (routes to spoke networks via firewall)
   routes = var.app_gateway_route_table_routes

@@ -103,7 +103,7 @@ module "function_app" {
 
   # Site Configuration
   always_on              = true
-  vnet_route_all_enabled = false
+  vnet_route_all_enabled = true  # Route all traffic through VNet (via hub firewall)
   http2_enabled          = true
   minimum_tls_version    = "1.2"
 

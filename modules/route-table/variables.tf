@@ -42,10 +42,10 @@ variable "resource_group_name" {
   description = "Name of the resource group"
 }
 
-variable "disable_bgp_route_propagation" {
+variable "bgp_route_propagation_enabled" {
   type        = bool
-  description = "Disable BGP route propagation"
-  default     = false
+  description = "Enable BGP route propagation (set to false to disable)"
+  default     = true
 }
 
 variable "routes" {

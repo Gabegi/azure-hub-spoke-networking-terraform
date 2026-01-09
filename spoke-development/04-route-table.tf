@@ -21,7 +21,7 @@ module "function_route_table" {
   resource_group_name = module.rg_spoke.rg_name
 
   # Disable BGP route propagation to prevent on-premises routes
-  disable_bgp_route_propagation = true
+  bgp_route_propagation_enabled = false
 
   # Routes from tfvars
   routes = var.route_table_routes

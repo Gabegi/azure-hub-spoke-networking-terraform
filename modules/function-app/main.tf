@@ -48,20 +48,6 @@ resource "azurerm_linux_function_app" "function" {
     pre_warmed_instance_count              = var.pre_warmed_instance_count
     runtime_scale_monitoring_enabled       = var.runtime_scale_monitoring_enabled
 
-    ip_restriction {
-      name       = "AllowHubFirewall"
-      action     = "Allow"
-      ip_address = module.hub_firewall.firewall_public_ip
-      priority   = 100
-    }
-
-    ip_restriction {
-      name       = "DenyAll"
-      action     = "Deny"
-      ip_address = "0.0.0.0/0"
-      priority   = 200
-    }
-
     application_stack {
       dotnet_version = var.dotnet_version
           }
