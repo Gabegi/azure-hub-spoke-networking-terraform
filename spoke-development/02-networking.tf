@@ -54,6 +54,8 @@ module "function_subnet" {
 
   # Service endpoints for Function Apps
   service_endpoints = [
+    "Microsoft.Storage",
+    "Microsoft.Web"
   ]
 
   private_endpoint_network_policies_enabled = false

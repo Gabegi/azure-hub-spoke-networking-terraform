@@ -29,7 +29,13 @@ module "function_storage" {
   enable_shared_access_key      = true
   public_network_access_enabled = true
 
-  depends_on = [module.rg_spoke]
+  # Network Rules
+  network_rules_enabled        = true
+  network_rules_default_action = "Deny"
+  network_rules_subnet_ids     = [module.function_subnet[0].subnet_id]
+  network_rules_bypass         = ["AzureServices"]
+
+  depends_on = [module.rg_spoke, module.function_subnet]
 }
 
 # ============================================================================
