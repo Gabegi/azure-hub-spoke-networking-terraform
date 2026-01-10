@@ -88,3 +88,4 @@ desktop.ini
 hub/.terraform.lock.hcl
 spoke-development/.terraform.lock.hcl
 .terraform.lock.hcl
+hub/NUL
