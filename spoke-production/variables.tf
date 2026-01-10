@@ -157,6 +157,22 @@ variable "app_nsg_rules" {
   default     = []
 }
 
+variable "vm_nsg_rules" {
+  type = list(object({
+    name                       = string
+    priority                   = number
+    direction                  = string
+    access                     = string
+    protocol                   = string
+    source_port_range          = string
+    destination_port_range     = string
+    source_address_prefix      = string
+    destination_address_prefix = string
+    description                = string
+  }))
+  description = "Security rules for VM subnet NSG"
+  default     = []
+}
 
 # ============================================================================
 # Hub Integration
@@ -201,6 +217,17 @@ variable "route_table_routes" {
     next_hop_in_ip_address = string
   }))
   description = "Routes for spoke subnet route tables"
+  default     = []
+}
+
+variable "vm_route_table_routes" {
+  type = list(object({
+    name                   = string
+    address_prefix         = string
+    next_hop_type          = string
+    next_hop_in_ip_address = string
+  }))
+  description = "Routes for VM subnet route table"
   default     = []
 }
 
