@@ -4,10 +4,6 @@
 locals {
   # Network Configuration
   spoke_address_space = var.spoke_address_space
-  function_subnet     = "10.1.0.0/24"  # Function App subnet 
-
-  # Feature Flags
-  deploy_function_subnet = var.deploy_function_subnet
 
   # Monitoring Configuration
   enable_diagnostics        = var.enable_diagnostics

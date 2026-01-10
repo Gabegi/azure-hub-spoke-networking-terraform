@@ -66,11 +66,6 @@ variable "deploy_app_subnet" {
   default     = true
 }
 
-variable "deploy_function_subnet" {
-  type        = bool
-  description = "Deploy Function App subnet"
-  default     = false
-}
 
 # ============================================================================
 # Service Endpoints Configuration
@@ -162,22 +157,6 @@ variable "app_nsg_rules" {
   default     = []
 }
 
-variable "function_nsg_rules" {
-  type = list(object({
-    name                       = string
-    priority                   = number
-    direction                  = string
-    access                     = string
-    protocol                   = string
-    source_port_range          = string
-    destination_port_range     = string
-    source_address_prefix      = string
-    destination_address_prefix = string
-    description                = string
-  }))
-  description = "Security rules for ACI subnet NSG"
-  default     = []
-}
 
 # ============================================================================
 # Hub Integration
