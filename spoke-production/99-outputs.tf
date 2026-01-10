@@ -35,27 +35,47 @@ output "vnet_address_space" {
 }
 
 # ============================================================================
-# ACI Subnet Outputs
+# VM Subnet Outputs
 # ============================================================================
 
-output "function_subnet_id" {
-  value       = local.deploy_function_subnet ? module.function_subnet[0].subnet_id : null
-  description = "ACI subnet ID (if deployed)"
+output "vm_subnet_id" {
+  value       = module.vm_subnet.subnet_id
+  description = "VM subnet ID"
 }
 
-output "function_nsg_id" {
-  value       = local.deploy_function_subnet ? module.function_nsg[0].nsg_id : null
-  description = "ACI NSG ID (if deployed)"
+output "vm_nsg_id" {
+  value       = module.vm_nsg.nsg_id
+  description = "VM NSG ID"
 }
 
-output "function_route_table_id" {
-  value       = local.deploy_function_subnet ? module.function_route_table[0].route_table_id : null
-  description = "ACI route table ID (if deployed)"
+output "vm_route_table_id" {
+  value       = module.vm_route_table.route_table_id
+  description = "VM route table ID"
 }
 
 # ============================================================================
-# ACI Container Instance Outputs
+# VM Outputs
 # ============================================================================
+
+output "vm_id" {
+  value       = module.vm.vm_id
+  description = "VM resource ID"
+}
+
+output "vm_name" {
+  value       = module.vm.vm_name
+  description = "VM name"
+}
+
+output "vm_private_ip" {
+  value       = module.vm.vm_private_ip
+  description = "VM private IP address"
+}
+
+output "vm_identity_principal_id" {
+  value       = module.vm.vm_identity_principal_id
+  description = "VM system-assigned managed identity principal ID"
+}
 
 # ============================================================================
 # Peering Outputs
@@ -80,7 +100,8 @@ output "spoke_summary" {
     resource_group     = module.rg_spoke.rg_name
     vnet_name          = module.spoke_vnet.vnet_name
     vnet_address_space = local.spoke_address_space
-    aci_deployed       = local.deploy_function_subnet
+    vm_name            = module.vm.vm_name
+    vm_private_ip      = module.vm.vm_private_ip
     forced_tunneling   = local.enable_forced_tunneling
     resource_lock      = var.enable_resource_lock
     peering_to_hub     = azurerm_virtual_network_peering.spoke_to_hub.name
