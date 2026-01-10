@@ -21,10 +21,10 @@ module "vm" {
   subnet_id           = module.vm_subnet.subnet_id
 
   # VM Configuration
-  vm_size              = "Standard_B1s"
+  vm_size              = "Standard_B2s"
   admin_username       = "azureuser"
   admin_ssh_public_key = var.vm_admin_ssh_public_key
-  availability_zones   = []  # Standard_B1s does not support availability zones
+  availability_zones   = []  # B-series VMs don't require availability zones
 
   # Network Configuration
   enable_public_ip = false  # Private IP only - no public IP
