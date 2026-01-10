@@ -323,3 +323,19 @@ variable "tags" {
     error_message = "Azure supports a maximum of 50 tags per resource"
   }
 }
+
+# ============================================================================
+# Firewall Rules
+# ============================================================================
+
+variable "network_rules" {
+  type = list(object({
+    name                  = string
+    protocols             = list(string)
+    source_addresses      = list(string)
+    destination_addresses = list(string)
+    destination_ports     = list(string)
+  }))
+  description = "Network rules for the firewall policy"
+  default     = []
+}

@@ -42,6 +42,9 @@ module "firewall" {
   enable_diagnostic_settings = var.enable_diagnostics
   log_analytics_workspace_id = azurerm_log_analytics_workspace.hub.id
 
+  # Network Rules
+  network_rules = var.firewall_network_rules
+
   depends_on = [
     module.firewall_subnet,
     azurerm_log_analytics_workspace.hub

@@ -257,6 +257,32 @@ resource "azurerm_monitor_diagnostic_setting" "firewall" {
   }
 }
 
+# Firewall Policy Rule Collection Group for Network Rules
+resource "azurerm_firewall_policy_rule_collection_group" "network_rules" {
+  count = var.create_firewall_policy && length(var.network_rules) > 0 ? 1 : 0
+
+  name               = "DefaultNetworkRuleCollectionGroup"
+  firewall_policy_id = azurerm_firewall_policy.policy[0].id
+  priority           = 200
+
+  network_rule_collection {
+    name     = "NetworkRuleCollection"
+    priority = 200
+    action   = "Allow"
+
+    dynamic "rule" {
+      for_each = var.network_rules
+      content {
+        name                  = rule.value.name
+        protocols             = rule.value.protocols
+        source_addresses      = rule.value.source_addresses
+        destination_addresses = rule.value.destination_addresses
+        destination_ports     = rule.value.destination_ports
+      }
+    }
+  }
+}
+
 # Optional: Public IP Prefix for predictable SNAT IP ranges
 # Useful for whitelisting firewall IPs at external services
 resource "azurerm_public_ip_prefix" "firewall" {
