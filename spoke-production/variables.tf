@@ -13,12 +13,12 @@ variable "subscription_id" {
 
 variable "environment" {
   type        = string
-  description = "Environment name (production)"
-  default     = "production"
+  description = "Environment name (prd)"
+  default     = "prd"
 
   validation {
-    condition     = var.environment == "production"
-    error_message = "Environment must be 'production' for this spoke."
+    condition     = var.environment == "prd"
+    error_message = "Environment must be 'prd' for this spoke."
   }
 }
 
