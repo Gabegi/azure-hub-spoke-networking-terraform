@@ -4,6 +4,153 @@ Production-ready Azure hub-spoke network topology implemented using Terraform, f
 
 This repository uses **Terragrunt** to manage the Hub-Spoke infrastructure deployment with automatic dependency management and state orchestration.
 
+---
+
+## 🎯 Hub-Spoke Architecture: How It Works
+
+The hub-spoke architecture enforces **centralized traffic inspection and control** through three critical components working together:
+
+### The Three Pillars
+
+1. **Route Tables** - Force all spoke traffic through the hub firewall
+2. **Firewall Network Rules** - Control what traffic is allowed between spokes and to the internet
+3. **NSG (Network Security Groups)** - Provide subnet-level security as the first line of defense
+
+**Traffic Flow Example:**
+```
+Dev VM (10.1.0.5) → Dev NSG (allow) → Route Table (send to 10.0.0.4) →
+Hub Firewall (10.0.0.4) (inspect & allow) → Route Table (to prod) →
+Prod NSG (allow) → Prod VM (10.2.0.5)
+```
+
+Without ANY ONE of these components, spoke-to-spoke communication would fail or bypass security controls.
+
+---
+
+## 📋 Complete Rule Set Reference
+
+### 🔥 Firewall Network Rules (Hub - 10.0.0.4)
+
+**Purpose:** Centralized policy enforcement for all spoke-to-spoke and spoke-to-internet traffic.
+
+| Rule Name | Protocol | Source | Destination | Ports | Purpose |
+|-----------|----------|--------|-------------|-------|---------|
+| **AllowDevToProdSSH** | TCP | 10.1.0.0/24 | 10.2.0.0/24 | 22 | Dev VM → Prod VM SSH |
+| **AllowProdToDevSSH** | TCP | 10.2.0.0/24 | 10.1.0.0/24 | 22 | Prod VM → Dev VM SSH |
+| **AllowDevToProdICMP** | ICMP | 10.1.0.0/24 | 10.2.0.0/24 | * | Dev VM → Prod VM ping |
+| **AllowProdToDevICMP** | ICMP | 10.2.0.0/24 | 10.1.0.0/24 | * | Prod VM → Dev VM ping |
+| **AllowDevVMInternet** | TCP | 10.1.0.0/24 | * | 80, 443 | Dev VM → Internet (updates) |
+| **AllowProdVMInternet** | TCP | 10.2.0.0/24 | * | 80, 443 | Prod VM → Internet (updates) |
+| **AllowDNS** | UDP | 10.1.0.0/24<br>10.2.0.0/24 | * | 53 | DNS resolution |
+
+**Default Action:** Deny all traffic not explicitly allowed ⛔
+
+---
+
+### 🛣️ Route Tables (Spoke Subnets)
+
+**Purpose:** Override Azure's default routing to force traffic through the hub firewall for inspection.
+
+#### Development Spoke (10.1.0.0/16)
+
+| Route Name | Destination | Next Hop Type | Next Hop IP | Purpose |
+|------------|-------------|---------------|-------------|---------|
+| **InternetViaFirewall** | 0.0.0.0/0 | VirtualAppliance | 10.0.0.4 | All internet traffic → Firewall |
+| **ProductionSpokeViaFirewall** | 10.2.0.0/16 | VirtualAppliance | 10.0.0.4 | All prod traffic → Firewall |
+
+#### Production Spoke (10.2.0.0/16)
+
+| Route Name | Destination | Next Hop Type | Next Hop IP | Purpose |
+|------------|-------------|---------------|-------------|---------|
+| **InternetViaFirewall** | 0.0.0.0/0 | VirtualAppliance | 10.0.0.4 | All internet traffic → Firewall |
+| **DevelopmentSpokeViaFirewall** | 10.1.0.0/16 | VirtualAppliance | 10.0.0.4 | All dev traffic → Firewall |
+
+**⚠️ Critical:** `bgp_route_propagation_enabled = false` prevents on-premises routes from bypassing the firewall.
+
+---
+
+### 🛡️ NSG Rules (Subnet-Level Security)
+
+**Purpose:** First line of defense before traffic reaches the route table. Defense in depth.
+
+#### Development VM Subnet NSG (10.1.0.0/24)
+
+**Inbound Rules:**
+
+| Priority | Name | Direction | Protocol | Source | Destination | Ports | Action |
+|----------|------|-----------|----------|--------|-------------|-------|--------|
+| 100 | AllowProdVMSSHInbound | Inbound | TCP | 10.2.0.0/24 | 10.1.0.0/24 | 22 | Allow ✅ |
+| 110 | AllowProdVMICMPInbound | Inbound | ICMP | 10.2.0.0/24 | 10.1.0.0/24 | * | Allow ✅ |
+| 4095 | AllowAzureLoadBalancer | Inbound | * | AzureLoadBalancer | * | * | Allow ✅ |
+| 4096 | DenyAllInbound | Inbound | * | * | * | * | Deny ⛔ |
+
+**Outbound Rules:**
+
+| Priority | Name | Direction | Protocol | Source | Destination | Ports | Action |
+|----------|------|-----------|----------|--------|-------------|-------|--------|
+| 100 | AllowToProdVMSSH | Outbound | TCP | 10.1.0.0/24 | 10.2.0.0/24 | 22 | Allow ✅ |
+| 110 | AllowToProdVMICMP | Outbound | ICMP | 10.1.0.0/24 | 10.2.0.0/24 | * | Allow ✅ |
+| 200 | AllowInternetHTTPS | Outbound | TCP | 10.1.0.0/24 | Internet | 443 | Allow ✅ |
+| 210 | AllowInternetHTTP | Outbound | TCP | 10.1.0.0/24 | Internet | 80 | Allow ✅ |
+| 300 | AllowDNS | Outbound | UDP | 10.1.0.0/24 | Internet | 53 | Allow ✅ |
+| 4096 | DenyAllOutbound | Outbound | * | * | * | * | Deny ⛔ |
+
+#### Production VM Subnet NSG (10.2.0.0/24)
+
+**Inbound Rules:**
+
+| Priority | Name | Direction | Protocol | Source | Destination | Ports | Action |
+|----------|------|-----------|----------|--------|-------------|-------|--------|
+| 100 | AllowDevVMSSHInbound | Inbound | TCP | 10.1.0.0/24 | 10.2.0.0/24 | 22 | Allow ✅ |
+| 110 | AllowDevVMICMPInbound | Inbound | ICMP | 10.1.0.0/24 | 10.2.0.0/24 | * | Allow ✅ |
+| 4095 | AllowAzureLoadBalancer | Inbound | * | AzureLoadBalancer | * | * | Allow ✅ |
+| 4096 | DenyAllInbound | Inbound | * | * | * | * | Deny ⛔ |
+
+**Outbound Rules:**
+
+| Priority | Name | Direction | Protocol | Source | Destination | Ports | Action |
+|----------|------|-----------|----------|--------|-------------|-------|--------|
+| 100 | AllowToDevVMSSH | Outbound | TCP | 10.2.0.0/24 | 10.1.0.0/24 | 22 | Allow ✅ |
+| 110 | AllowToDevVMICMP | Outbound | ICMP | 10.2.0.0/24 | 10.1.0.0/24 | * | Allow ✅ |
+| 200 | AllowInternetHTTPS | Outbound | TCP | 10.2.0.0/24 | Internet | 443 | Allow ✅ |
+| 210 | AllowInternetHTTP | Outbound | TCP | 10.2.0.0/24 | Internet | 80 | Allow ✅ |
+| 300 | AllowDNS | Outbound | UDP | 10.2.0.0/24 | Internet | 53 | Allow ✅ |
+| 4096 | DenyAllOutbound | Outbound | * | * | * | * | Deny ⛔ |
+
+**Default NSG Behavior:** Explicit deny-all rules ensure Zero Trust - nothing is allowed unless explicitly permitted.
+
+---
+
+### 🔗 VNet Peering Configuration
+
+**Purpose:** Establish connectivity between hub and spokes while preventing direct spoke-to-spoke communication.
+
+| Peering | From | To | allow_virtual_network_access | allow_forwarded_traffic | use_remote_gateways |
+|---------|------|-----|------------------------------|-------------------------|---------------------|
+| spoke-to-hub | Dev/Prod | Hub | ✅ true | ✅ true | ❌ false |
+| hub-to-spoke | Hub | Dev/Prod | ✅ true | ✅ true | ❌ false |
+
+**Key Points:**
+- `allow_forwarded_traffic = true` - Critical for hub firewall to forward spoke-to-spoke traffic
+- No direct spoke-to-spoke peering exists - forces traffic through hub
+- Gateway transit disabled (we're using firewall, not VPN/ExpressRoute gateway)
+
+---
+
+## 🚦 What Would Break Without Each Component?
+
+| Missing Component | Result | Why |
+|------------------|--------|-----|
+| **Route Tables** | Spokes communicate directly via VNet peering | Azure's default routing bypasses the firewall |
+| **Firewall Rules** | All spoke-to-spoke traffic blocked | Firewall defaults to deny-all |
+| **NSG Rules** | Traffic would reach firewall but might bypass subnet restrictions | Defense-in-depth broken |
+| **VNet Peering** | Complete network isolation | No connectivity between hub and spokes |
+| **allow_forwarded_traffic** | Firewall can't forward spoke-to-spoke traffic | Peering doesn't allow transit |
+
+**All components must work together** - this is defense-in-depth and Zero Trust in action.
+
+---
+
 ## ⚠️ IMPORTANT: Use Terragrunt Commands, NOT Terraform
 
 **DO NOT run `terraform init`, `terraform plan`, or `terraform apply`**
