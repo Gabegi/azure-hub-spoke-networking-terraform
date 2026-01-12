@@ -1,8 +1,27 @@
 # modules/subnet/main.tf
 # Generic Subnet module - reusable for any subnet type
 
+# ============================================================================
+# Internal Naming Module
+# ============================================================================
+
+module "naming" {
+  source = "../naming"
+
+  resource_type = var.resource_type
+  workload      = var.workload
+  environment   = var.environment
+  location      = var.location
+  instance      = var.instance
+  common_tags   = var.common_tags
+}
+
+# ============================================================================
+# Subnet Resource
+# ============================================================================
+
 resource "azurerm_subnet" "subnet" {
-  name                 = var.subnet_name
+  name                 = var.subnet_name != null ? var.subnet_name : module.naming.name
   resource_group_name  = var.resource_group_name
   virtual_network_name = var.virtual_network_name
   address_prefixes     = var.address_prefixes

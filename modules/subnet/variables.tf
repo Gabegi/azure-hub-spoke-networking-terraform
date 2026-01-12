@@ -1,8 +1,50 @@
 # modules/subnet/variables.tf
 
+# ============================================================================
+# Naming Variables (for internal naming module)
+# ============================================================================
+
+variable "resource_type" {
+  type        = string
+  description = "Azure resource type abbreviation (e.g., 'snet' for Subnet)"
+  default     = "snet"
+}
+
+variable "workload" {
+  type        = string
+  description = "Workload or application name"
+}
+
+variable "environment" {
+  type        = string
+  description = "Environment name (e.g., 'dev', 'prd', 'shared')"
+}
+
+variable "location" {
+  type        = string
+  description = "Azure region for the subnet"
+}
+
+variable "instance" {
+  type        = string
+  description = "Instance number (e.g., '001', '002')"
+  default     = "001"
+}
+
+variable "common_tags" {
+  type        = map(string)
+  description = "Common tags to merge with module-generated tags"
+  default     = {}
+}
+
+# ============================================================================
+# Resource Configuration
+# ============================================================================
+
 variable "subnet_name" {
   type        = string
-  description = "Name of the subnet"
+  description = "Optional: Override subnet name (if null, uses naming module)"
+  default     = null
 }
 
 variable "resource_group_name" {

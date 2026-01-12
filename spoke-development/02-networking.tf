@@ -24,28 +24,21 @@ module "spoke_vnet" {
 }
 
 # ============================================================================
-# VM Subnet Naming
-# ============================================================================
-
-module "vm_subnet_naming" {
-  source = "../modules/naming"
-
-  resource_type = "snet"
-  workload      = "vm"
-  environment   = var.environment
-  location      = var.location
-  instance      = "001"
-  common_tags   = var.tags
-}
-
-# ============================================================================
 # VM Subnet
 # ============================================================================
 
 module "vm_subnet" {
   source = "../modules/subnet"
 
-  subnet_name          = module.vm_subnet_naming.name
+  # Naming (module handles naming internally)
+  resource_type = "snet"
+  workload      = "vm"
+  environment   = var.environment
+  location      = var.location
+  instance      = "001"
+  common_tags   = var.tags
+
+  # Network Configuration
   resource_group_name  = module.rg_spoke.rg_name
   virtual_network_name = module.spoke_vnet.vnet_name
   address_prefixes     = ["10.1.0.0/24"]
