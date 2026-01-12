@@ -1,686 +1,367 @@
 # Azure Hub-Spoke Networking with Terraform
 
-Production-ready Azure hub-spoke network topology implemented using Terraform, following Microsoft best practices for enterprise networking with Zero Trust security model.
-
-This repository uses **Terragrunt** to manage the Hub-Spoke infrastructure deployment with automatic dependency management and state orchestration.
+Production-ready Azure hub-spoke network topology with Zero Trust security, managed via Terragrunt for automatic dependency orchestration.
 
 ---
 
-## 🎯 Hub-Spoke Architecture: How It Works
+## 📋 Complete Security Reference
 
-The hub-spoke architecture enforces **centralized traffic inspection and control** through three critical components working together:
+**🔐 [VIEW ALL SECURITY RULES →](./SECURITY-RULES.md)**
 
-### The Three Pillars
-
-1. **Route Tables** - Force all spoke traffic through the hub firewall
-2. **Firewall Network Rules** - Control what traffic is allowed between spokes and to the internet
-3. **NSG (Network Security Groups)** - Provide subnet-level security as the first line of defense
-
-**Traffic Flow Example:**
-```
-Dev VM (10.1.0.5) → Dev NSG (allow) → Route Table (send to 10.0.0.4) →
-Hub Firewall (10.0.0.4) (inspect & allow) → Route Table (to prod) →
-Prod NSG (allow) → Prod VM (10.2.0.5)
-```
-
-Without ANY ONE of these components, spoke-to-spoke communication would fail or bypass security controls.
+All firewall rules, NSG rules, route tables, and network policies are documented in [SECURITY-RULES.md](./SECURITY-RULES.md):
+- 7 Firewall Network Rules
+- 10 NSG Rules per Spoke (Dev + Prod)
+- Route Tables for forced tunneling
+- VNet Peering configuration
+- Traffic flow examples
 
 ---
 
-## 📋 Complete Rule Set Reference
+## 🚀 Quick Start
 
-### 🔥 Firewall Network Rules (Hub - 10.0.0.4)
+### Prerequisites
 
-**Purpose:** Centralized policy enforcement for all spoke-to-spoke and spoke-to-internet traffic.
+- [Terragrunt](https://terragrunt.gruntwork.io/docs/getting-started/install/) >= 0.48
+- [Terraform](https://www.terraform.io/downloads.html) >= 1.0
+- [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) >= 2.30
+- Azure subscription with Contributor permissions
 
-| Rule Name | Protocol | Source | Destination | Ports | Purpose |
-|-----------|----------|--------|-------------|-------|---------|
-| **AllowDevToProdSSH** | TCP | 10.1.0.0/24 | 10.2.0.0/24 | 22 | Dev VM → Prod VM SSH |
-| **AllowProdToDevSSH** | TCP | 10.2.0.0/24 | 10.1.0.0/24 | 22 | Prod VM → Dev VM SSH |
-| **AllowDevToProdICMP** | ICMP | 10.1.0.0/24 | 10.2.0.0/24 | * | Dev VM → Prod VM ping |
-| **AllowProdToDevICMP** | ICMP | 10.2.0.0/24 | 10.1.0.0/24 | * | Prod VM → Dev VM ping |
-| **AllowDevVMInternet** | TCP | 10.1.0.0/24 | * | 80, 443 | Dev VM → Internet (updates) |
-| **AllowProdVMInternet** | TCP | 10.2.0.0/24 | * | 80, 443 | Prod VM → Internet (updates) |
-| **AllowDNS** | UDP | 10.1.0.0/24<br>10.2.0.0/24 | * | 53 | DNS resolution |
+### Deploy Everything
 
-**Default Action:** Deny all traffic not explicitly allowed ⛔
+```bash
+# 1. Login to Azure
+az login
+az account set --subscription "<your-subscription-id>"
 
----
+# 2. Add your SSH public key to tfvars files
+# Edit vars/dev.auto.tfvars.hcl and vars/prod.auto.tfvars.hcl
+# Replace vm_admin_ssh_public_key with your public key from:
+cat ~/.ssh/id_rsa.pub
 
-### 🛣️ Route Tables (Spoke Subnets)
-
-**Purpose:** Override Azure's default routing to force traffic through the hub firewall for inspection.
-
-#### Development Spoke (10.1.0.0/16)
-
-| Route Name | Destination | Next Hop Type | Next Hop IP | Purpose |
-|------------|-------------|---------------|-------------|---------|
-| **InternetViaFirewall** | 0.0.0.0/0 | VirtualAppliance | 10.0.0.4 | All internet traffic → Firewall |
-| **ProductionSpokeViaFirewall** | 10.2.0.0/16 | VirtualAppliance | 10.0.0.4 | All prod traffic → Firewall |
-
-#### Production Spoke (10.2.0.0/16)
-
-| Route Name | Destination | Next Hop Type | Next Hop IP | Purpose |
-|------------|-------------|---------------|-------------|---------|
-| **InternetViaFirewall** | 0.0.0.0/0 | VirtualAppliance | 10.0.0.4 | All internet traffic → Firewall |
-| **DevelopmentSpokeViaFirewall** | 10.1.0.0/16 | VirtualAppliance | 10.0.0.4 | All dev traffic → Firewall |
-
-**⚠️ Critical:** `bgp_route_propagation_enabled = false` prevents on-premises routes from bypassing the firewall.
-
----
-
-### 🛡️ NSG Rules (Subnet-Level Security)
-
-**Purpose:** First line of defense before traffic reaches the route table. Defense in depth.
-
-#### Development VM Subnet NSG (10.1.0.0/24)
-
-**Inbound Rules:**
-
-| Priority | Name | Direction | Protocol | Source | Destination | Ports | Action |
-|----------|------|-----------|----------|--------|-------------|-------|--------|
-| 100 | AllowProdVMSSHInbound | Inbound | TCP | 10.2.0.0/24 | 10.1.0.0/24 | 22 | Allow ✅ |
-| 110 | AllowProdVMICMPInbound | Inbound | ICMP | 10.2.0.0/24 | 10.1.0.0/24 | * | Allow ✅ |
-| 4095 | AllowAzureLoadBalancer | Inbound | * | AzureLoadBalancer | * | * | Allow ✅ |
-| 4096 | DenyAllInbound | Inbound | * | * | * | * | Deny ⛔ |
-
-**Outbound Rules:**
-
-| Priority | Name | Direction | Protocol | Source | Destination | Ports | Action |
-|----------|------|-----------|----------|--------|-------------|-------|--------|
-| 100 | AllowToProdVMSSH | Outbound | TCP | 10.1.0.0/24 | 10.2.0.0/24 | 22 | Allow ✅ |
-| 110 | AllowToProdVMICMP | Outbound | ICMP | 10.1.0.0/24 | 10.2.0.0/24 | * | Allow ✅ |
-| 200 | AllowInternetHTTPS | Outbound | TCP | 10.1.0.0/24 | Internet | 443 | Allow ✅ |
-| 210 | AllowInternetHTTP | Outbound | TCP | 10.1.0.0/24 | Internet | 80 | Allow ✅ |
-| 300 | AllowDNS | Outbound | UDP | 10.1.0.0/24 | Internet | 53 | Allow ✅ |
-| 4096 | DenyAllOutbound | Outbound | * | * | * | * | Deny ⛔ |
-
-#### Production VM Subnet NSG (10.2.0.0/24)
-
-**Inbound Rules:**
-
-| Priority | Name | Direction | Protocol | Source | Destination | Ports | Action |
-|----------|------|-----------|----------|--------|-------------|-------|--------|
-| 100 | AllowDevVMSSHInbound | Inbound | TCP | 10.1.0.0/24 | 10.2.0.0/24 | 22 | Allow ✅ |
-| 110 | AllowDevVMICMPInbound | Inbound | ICMP | 10.1.0.0/24 | 10.2.0.0/24 | * | Allow ✅ |
-| 4095 | AllowAzureLoadBalancer | Inbound | * | AzureLoadBalancer | * | * | Allow ✅ |
-| 4096 | DenyAllInbound | Inbound | * | * | * | * | Deny ⛔ |
-
-**Outbound Rules:**
-
-| Priority | Name | Direction | Protocol | Source | Destination | Ports | Action |
-|----------|------|-----------|----------|--------|-------------|-------|--------|
-| 100 | AllowToDevVMSSH | Outbound | TCP | 10.2.0.0/24 | 10.1.0.0/24 | 22 | Allow ✅ |
-| 110 | AllowToDevVMICMP | Outbound | ICMP | 10.2.0.0/24 | 10.1.0.0/24 | * | Allow ✅ |
-| 200 | AllowInternetHTTPS | Outbound | TCP | 10.2.0.0/24 | Internet | 443 | Allow ✅ |
-| 210 | AllowInternetHTTP | Outbound | TCP | 10.2.0.0/24 | Internet | 80 | Allow ✅ |
-| 300 | AllowDNS | Outbound | UDP | 10.2.0.0/24 | Internet | 53 | Allow ✅ |
-| 4096 | DenyAllOutbound | Outbound | * | * | * | * | Deny ⛔ |
-
-**Default NSG Behavior:** Explicit deny-all rules ensure Zero Trust - nothing is allowed unless explicitly permitted.
-
----
-
-### 🔗 VNet Peering Configuration
-
-**Purpose:** Establish connectivity between hub and spokes while preventing direct spoke-to-spoke communication.
-
-| Peering | From | To | allow_virtual_network_access | allow_forwarded_traffic | use_remote_gateways |
-|---------|------|-----|------------------------------|-------------------------|---------------------|
-| spoke-to-hub | Dev/Prod | Hub | ✅ true | ✅ true | ❌ false |
-| hub-to-spoke | Hub | Dev/Prod | ✅ true | ✅ true | ❌ false |
-
-**Key Points:**
-- `allow_forwarded_traffic = true` - Critical for hub firewall to forward spoke-to-spoke traffic
-- No direct spoke-to-spoke peering exists - forces traffic through hub
-- Gateway transit disabled (we're using firewall, not VPN/ExpressRoute gateway)
-
----
-
-## 🚦 What Would Break Without Each Component?
-
-| Missing Component | Result | Why |
-|------------------|--------|-----|
-| **Route Tables** | Spokes communicate directly via VNet peering | Azure's default routing bypasses the firewall |
-| **Firewall Rules** | All spoke-to-spoke traffic blocked | Firewall defaults to deny-all |
-| **NSG Rules** | Traffic would reach firewall but might bypass subnet restrictions | Defense-in-depth broken |
-| **VNet Peering** | Complete network isolation | No connectivity between hub and spokes |
-| **allow_forwarded_traffic** | Firewall can't forward spoke-to-spoke traffic | Peering doesn't allow transit |
-
-**All components must work together** - this is defense-in-depth and Zero Trust in action.
-
----
-
-## ⚠️ IMPORTANT: Use Terragrunt Commands, NOT Terraform
-
-**DO NOT run `terraform init`, `terraform plan`, or `terraform apply`**
-
-Instead, use Terragrunt commands:
-
-- ❌ `terraform init` → ✅ `terragrunt init` or `terragrunt run-all init`
-- ❌ `terraform plan` → ✅ `terragrunt plan` or `terragrunt run-all plan`
-- ❌ `terraform apply` → ✅ `terragrunt apply` or `terragrunt run-all apply`
-
-In our case, we only need two
-Deploy all (hub first, then spokes automatically)
-terragrunt run-all apply
-
-Destroy all (spokes first, then hub automatically)
-terragrunt run-all destroy
-
-Terragrunt wraps Terraform and adds automatic dependency management, remote state configuration, and DRY principles.
-
-with Terragrunt, you don't run terraform init at all. You use Terragrunt commands instead.
-
-From Root Directory:
-
-# Initialize all modules (hub + both spokes)
-
+# 3. Deploy all infrastructure (hub + spokes)
 terragrunt run-all init
-
-# Plan all modules
-
 terragrunt run-all plan
-
-# Apply all modules (deploys everything in correct order)
-
 terragrunt run-all apply
+```
 
-Or Initialize Individual Modules:
+**Terragrunt automatically:**
+- Deploys hub first (firewall, bastion, app gateway)
+- Deploys both spokes in parallel after hub is ready
+- Configures Azure Storage backend for state files
 
-# Initialize just the hub
+### Destroy Everything
 
-cd hub
-terragrunt init
+```bash
+# Destroy all resources (spokes → hub)
+terragrunt run-all destroy
+```
 
-# Initialize just dev spoke
+---
 
-cd spoke-development
-terragrunt init
-
-What Terragrunt Does
-
-When you run terragrunt init, it:
-
-1. Auto-generates backend.tf (Azure Storage state config)
-2. Auto-generates provider.tf (Azure provider)
-3. Runs terraform init for you automatically
-4. Configures remote state
-
-# Destroy everything
-
-From root folder run terragrunt run-all destroy
-
-## Table of Contents
-
-- [Overview](#overview)
-- [Architecture](#architecture)
-- [Key Features](#key-features)
-- [IP Address Planning](#ip-address-planning)
-- [Security Model](#security-model)
-- [Project Structure](#project-structure)
-- [Prerequisites](#prerequisites)
-- [Quick Start](#quick-start)
-- [Testing Connectivity](#testing-connectivity)
-- [Cost Considerations](#cost-considerations)
-- [References](#references)
-
-## Overview
-
-This Terraform project implements a **hub-spoke network topology** in Azure with **two environments**:
-
-- **Development** (10.1.0.0/16) - Full internet access for development
-- **Production** (10.2.0.0/16) - Restricted access with Zero Trust principles
-
-All infrastructure is **fully variable-driven**, making it easy to customize and extend.
-
-### Key Features
-
-✅ **Hub-Spoke Architecture**
-
-- Centralized hub VNet (10.0.0.0/16) with Azure Firewall and Bastion
-- Two spoke VNets (Development and Production)
-- VNet peering with forced tunneling through hub firewall
-
-✅ **Security**
-
-- Azure Firewall with Zero Trust policies
-- NSG rules fully configurable via variables
-- Route tables with explicit spoke-to-spoke routes
-- Azure Bastion for secure VM access (no public IPs)
-
-✅ **Network Services**
-
-- Application Gateway (mandatory, always deployed)
-- Azure Firewall (Standard/Premium SKU)
-- Azure Bastion (Basic/Standard SKU)
-- Management subnet (ready for jumpboxes)
-
-✅ **Infrastructure as Code**
-
-- Fully modular Terraform design
-- Variable-driven configuration
-- Microsoft naming conventions
-- Comprehensive tagging strategy
-
-✅ **Testing**
-
-- Test VMs in each spoke (Ubuntu 22.04 with nginx)
-- Pre-configured connectivity test scripts
-- Ready for spoke-to-spoke communication testing
-
-## Architecture
+## 🏗️ Architecture
 
 ```
                     ┌─────────────────────────────────────┐
                     │       Hub VNet (10.0.0.0/16)        │
                     │                                     │
                     │  ┌───────────────────────────────┐  │
-                    │  │ Azure Firewall (10.0.0.0/26)  │  │
-                    │  │ Zero Trust Policy Engine      │  │
+                    │  │ Azure Firewall (10.0.0.4)     │  │
+                    │  │ ← All Traffic Routes Here     │  │
                     │  └───────────────────────────────┘  │
                     │                                     │
-                    │  ┌───────────────────────────────┐  │
-                    │  │ Azure Bastion (10.0.1.0/26)   │  │
-                    │  │ Secure VM Access              │  │
-                    │  └───────────────────────────────┘  │
-                    │                                     │
-                    │  ┌───────────────────────────────┐  │
-                    │  │ App Gateway (10.0.4.0/24)     │  │
-                    │  │ Application Load Balancer     │  │
-                    │  └───────────────────────────────┘  │
-                    │                                     │
-                    │  ┌───────────────────────────────┐  │
-                    │  │ Management (10.0.3.0/24)      │  │
-                    │  │ Empty (for jumpboxes)         │  │
-                    │  └───────────────────────────────┘  │
+                    │  App Gateway (10.0.4.0/24)          │
                     └────────────┬────────────────────────┘
                                  │
                     ┌────────────┴────────────┐
                     │                         │
         ┌───────────▼──────────┐  ┌──────────▼───────────┐
-        │  Development Spoke   │  │  Production Spoke    │
+        │  Dev Spoke           │  │  Prod Spoke          │
         │  10.1.0.0/16         │  │  10.2.0.0/16         │
-        │                      │  │                      │
-        │  ┌────────────────┐  │  │  ┌────────────────┐  │
-        │  │ Workload       │  │  │  │ Workload       │  │
-        │  │ (10.1.1.0/24)  │  │  │  │ (10.2.1.0/24)  │  │
-        │  │ ✅ Test VM      │  │  │  │ ✅ Test VM      │  │
-        │  ├────────────────┤  │  │  ├────────────────┤  │
-        │  │ Data           │  │  │  │ Data           │  │
-        │  │ (10.1.2.0/24)  │  │  │  │ (10.2.2.0/24)  │  │
-        │  ├────────────────┤  │  │  ├────────────────┤  │
-        │  │ App            │  │  │  │ App            │  │
-        │  │ (10.1.3.0/24)  │  │  │  │ (10.2.3.0/24)  │  │
-        │  └────────────────┘  │  │  └────────────────┘  │
+        │  ✅ VM (10.1.0.0/24) │  │  ✅ VM (10.2.0.0/24) │
         └──────────────────────┘  └──────────────────────┘
 
-Traffic Flow:
-- All spoke traffic → Hub Firewall → Destination
-- Development → Production: HTTPS (443) ALLOWED
-- Production → Development: BLOCKED (one-way only)
+Traffic Flow: Spoke → Route Table → Firewall → NSG → Destination
 ```
 
-## IP Address Planning
+### Key Components
 
-### VNet Address Spaces
+- **Hub VNet (10.0.0.0/16)**: Centralized connectivity hub with Azure Firewall, Bastion, and Application Gateway
+- **Dev Spoke (10.1.0.0/16)**: Development environment with full internet access
+- **Prod Spoke (10.2.0.0/16)**: Production environment with restricted access
+- **Forced Tunneling**: All spoke traffic routed through hub firewall (10.0.0.4) for inspection
+- **Zero Trust**: Explicit deny-all + allow-list approach for all traffic
 
-| VNet        | CIDR Block        | Purpose                  | Status       |
-| ----------- | ----------------- | ------------------------ | ------------ |
-| Hub         | 10.0.0.0/16       | Central connectivity hub | ✅ Active    |
-| Development | 10.1.0.0/16       | Development environment  | ✅ Active    |
-| Production  | 10.2.0.0/16       | Production workloads     | ✅ Active    |
-| Reserved    | 10.3-10.10.0.0/16 | Future expansion         | 📋 Available |
+---
 
-### Hub VNet Subnets (10.0.0.0/16)
+## 🔒 Security Model
 
-| Subnet              | CIDR Block  | IPs | Purpose                        |
-| ------------------- | ----------- | --- | ------------------------------ |
-| AzureFirewallSubnet | 10.0.0.0/26 | 64  | Azure Firewall (required name) |
-| AzureBastionSubnet  | 10.0.1.0/26 | 64  | Azure Bastion (required name)  |
-| Management          | 10.0.3.0/24 | 256 | Jumpboxes, DevOps agents       |
-| App Gateway         | 10.0.4.0/24 | 256 | Application Gateway            |
+### The Three Pillars
 
-### Spoke VNet Subnets
+The hub-spoke architecture works through three components that **must work together**:
 
-Each spoke follows a consistent 3-tier pattern:
+1. **Route Tables** → Force all spoke traffic through the hub firewall (10.0.0.4)
+2. **Firewall Rules** → Control what traffic is allowed between spokes and internet
+3. **NSG Rules** → Subnet-level security as first line of defense
 
-**Development (10.1.0.0/16)**:
-
-- Workload: 10.1.1.0/24 (256 IPs) - Contains test VM
-- Data: 10.1.2.0/24 (256 IPs)
-- App: 10.1.3.0/24 (256 IPs)
-
-**Production (10.2.0.0/16)**:
-
-- Workload: 10.2.1.0/24 (256 IPs) - Contains test VM
-- Data: 10.2.2.0/24 (256 IPs)
-- App: 10.2.3.0/24 (256 IPs)
-
-## Security Model
-
-### Zero Trust Architecture
-
-**Firewall Rules**:
-
-- ✅ Development → Full Azure services + Internet (GitHub, npm, Docker, etc.)
-- ✅ Development → Production: **HTTPS (443) ONLY** for API calls
-- ✅ Production → Essential Azure services only (whitelist approach)
-- ❌ Production → Development: **BLOCKED** (no reverse access)
-- ❌ Production → General Internet: **BLOCKED** (essential services only)
-
-**Network Security Groups** (Fully Variable-Driven):
-
-- Management subnet: SSH/RDP from Bastion only
-- App Gateway subnet: Required ports for Gateway Manager + HTTPS from internet
-- All rules configurable via tfvars files
-
-**Route Tables** (Fully Variable-Driven):
-
-- All spoke traffic forced through hub firewall
-- Explicit routes for spoke-to-spoke communication
-- Routes prevent VNet peering bypass
-- All routes configurable via tfvars files
-
-### Traffic Flow Examples
-
-```bash
-# Dev → Internet (ALLOWED)
-Dev VM (10.1.1.5) → Firewall → Internet ✅
-
-# Dev → Prod API (ALLOWED)
-Dev VM (10.1.1.5) → Firewall → Prod VM (10.2.1.10):443 ✅
-
-# Prod → Dev (BLOCKED)
-Prod VM (10.2.1.10) → Firewall → DENIED ❌
-
-# Prod → Internet (RESTRICTED)
-Prod VM (10.2.1.10) → Firewall → Whitelist check → DENIED (unless approved) ❌
+**Traffic Example:**
+```
+Dev VM → Dev NSG ✅ → Route Table (→ 10.0.0.4) → Firewall ✅ → Prod NSG ✅ → Prod VM
 ```
 
-## Project Structure
+**Without any ONE component:**
+- No Route Tables → Traffic bypasses firewall via direct VNet peering ❌
+- No Firewall Rules → All traffic blocked (default deny) ❌
+- No NSG Rules → No defense-in-depth, single point of failure ❌
 
-```
-azure-hub-spoke-networking-terraform/
-├── provider.tf                    # Terraform and Azure provider config
-├── README.md                      # This file
-├── .gitignore                     # Git ignore rules
-│
-├── hub/                           # ⭐ Hub VNet (standalone module)
-│   ├── variables.tf               # Hub input variables
-│   ├── locals.tf                  # CIDR calculations and feature flags
-│   ├── 01-foundation.tf           # Resource group
-│   ├── 02-networking.tf           # VNet and subnets
-│   ├── 03-firewall.tf             # Azure Firewall
-│   ├── 04-bastion.tf              # Azure Bastion
-│   ├── 05-nsg.tf                  # Network Security Groups (variable-driven)
-│   ├── 06-firewall-rules.tf       # Firewall policy rules (Zero Trust)
-│   ├── 07-app-gateway.tf          # Application Gateway
-│   └── 99-outputs.tf              # Hub outputs
-│
-├── spoke-development/             # ⭐ Development Spoke (standalone module)
-│   ├── variables.tf               # Development-specific variables
-│   ├── locals.tf                  # CIDR calculations
-│   ├── 01-foundation.tf           # Resource group
-│   ├── 02-networking.tf           # VNet and subnets
-│   ├── 03-nsg.tf                  # Network Security Groups
-│   ├── 04-route-table.tf          # Route tables (variable-driven)
-│   ├── 05-peering.tf              # VNet peering to hub
-│   ├── 06-test-vm.tf              # Test VM (Ubuntu + nginx)
-│   └── 99-outputs.tf              # Development outputs
-│
-├── spoke-production/              # ⭐ Production Spoke (standalone module)
-│   ├── variables.tf               # Production-specific variables
-│   ├── locals.tf                  # CIDR calculations
-│   ├── 01-foundation.tf           # Resource group
-│   ├── 02-networking.tf           # VNet and subnets
-│   ├── 03-nsg.tf                  # Network Security Groups
-│   ├── 04-route-table.tf          # Route tables (variable-driven)
-│   ├── 05-peering.tf              # VNet peering to hub
-│   ├── 06-test-vm.tf              # Test VM (Ubuntu + nginx)
-│   └── 99-outputs.tf              # Production outputs
-│
-├── vars/                          # Configuration files
-│   ├── dev.tfvars                 # Development environment config
-│   ├── prod.tfvars                # Production environment config (gitignored)
-│   ├── example/
-│   │   └── prod.tfvars.example    # Production config template
-│   └── README.md                  # Vars documentation
-│
-└── modules/                       # Reusable Terraform modules
-    ├── naming/                    # Naming convention module
-    ├── resource-group/            # Resource group module
-    ├── vnet/                      # Virtual network module
-    ├── subnet/                    # Subnet module
-    ├── nsg/                       # Network security group module
-    ├── firewall/                  # Azure Firewall module
-    ├── bastion/                   # Azure Bastion module
-    ├── app-gateway/               # Application Gateway module
-    ├── route-table/               # Route table module
-    └── vm/                        # Virtual machine module
-```
+### Allowed Traffic
 
-## Prerequisites
+| Source | Destination | Ports | Status |
+|--------|-------------|-------|--------|
+| Dev VM | Prod VM | 22 (SSH), ICMP | ✅ Allowed |
+| Prod VM | Dev VM | 22 (SSH), ICMP | ✅ Allowed |
+| Dev VM | Internet | 80, 443, 53 | ✅ Allowed |
+| Prod VM | Internet | 80, 443, 53 | ✅ Allowed |
+| All Other Traffic | Any | Any | ❌ Denied |
 
-### Required Tools
+**📋 [Complete security rules reference →](./SECURITY-RULES.md)**
 
-- [Terraform](https://www.terraform.io/downloads.html) >= 1.0
-- [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) >= 2.30
-- Azure subscription with Contributor permissions
+---
 
-### Required Configuration
+## ⚠️ Use Terragrunt, NOT Terraform
 
-**1. SSH Key for Test VMs**
+This project uses **Terragrunt** for automatic dependency management and state orchestration.
 
-Generate an SSH key pair:
+### Why Terragrunt?
 
-```bash
-ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
-```
+- **Automatic dependency management** - Deploys hub before spokes, destroys spokes before hub
+- **Remote state configuration** - Auto-configures Azure Storage backend
+- **DRY principles** - Eliminates duplicate backend/provider configuration
+- **Module orchestration** - Runs multiple modules in correct order
 
-Get your public key:
+### Command Reference
 
-```bash
-cat ~/.ssh/id_rsa.pub
-```
+| Task | ❌ Don't Use | ✅ Use Instead |
+|------|--------------|----------------|
+| Initialize | `terraform init` | `terragrunt run-all init` |
+| Plan | `terraform plan` | `terragrunt run-all plan` |
+| Apply | `terraform apply` | `terragrunt run-all apply` |
+| Destroy | `terraform destroy` | `terragrunt run-all destroy` |
 
-Add it to your tfvars files (see Quick Start below).
-
-## Quick Start
-
-### 1. Clone and Configure
-
-```bash
-# Clone the repository
-git clone <repository-url>
-cd azure-hub-spoke-networking-terraform
-
-# Login to Azure
-az login
-
-# Set your subscription
-az account set --subscription "<your-subscription-id>"
-```
-
-### 2. Add Your SSH Public Key
-
-Edit **vars/dev.tfvars** and **vars/prod.tfvars**, replace this line:
-
-```hcl
-vm_admin_ssh_public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC... (REPLACE_WITH_YOUR_PUBLIC_KEY)"
-```
-
-With your actual SSH public key from `cat ~/.ssh/id_rsa.pub`
-
-### 3. Deploy Hub
-
+**Deploy individual module:**
 ```bash
 cd hub
-terraform init
-terraform plan -var-file="../vars/prod.tfvars"
-terraform apply -var-file="../vars/prod.tfvars"
+terragrunt init
+terragrunt apply
 ```
 
-This deploys:
-
-- Hub VNet (10.0.0.0/16)
-- Azure Firewall with Zero Trust policies
-- Azure Bastion for secure access
-- Application Gateway
-- NSGs for Management and App Gateway subnets
-
-### 4. Deploy Development Spoke
-
+**Deploy all modules:**
 ```bash
-cd ../spoke-development
-terraform init
-terraform plan -var-file="../vars/dev.tfvars"
-terraform apply -var-file="../vars/dev.tfvars"
+# From root directory
+terragrunt run-all apply
 ```
 
-This deploys:
+---
 
-- Development VNet (10.1.0.0/16)
-- 3 subnets (workload, data, app)
-- VNet peering to hub
-- Route tables with explicit routes
-- Test VM in workload subnet
+## 🧪 Testing Connectivity
 
-### 5. Deploy Production Spoke
+### Access VMs via Azure Portal
 
+1. Navigate to Azure Portal → Virtual Machines
+2. Select VM → Connect → Serial Console
+3. Login with username: `azureuser`
+
+### Test SSH Between VMs
+
+**From Dev VM:**
 ```bash
-cd ../spoke-production
-terraform init
-terraform plan -var-file="../vars/prod.tfvars"
-terraform apply -var-file="../vars/prod.tfvars"
+# SSH to Prod VM (should work)
+ssh azureuser@10.2.0.x
+
+# Ping Prod VM (should work)
+ping 10.2.0.x
 ```
 
-This deploys:
+**From Prod VM:**
+```bash
+# SSH to Dev VM (should work)
+ssh azureuser@10.1.0.x
 
-- Production VNet (10.2.0.0/16)
-- 3 subnets (workload, data, app)
-- VNet peering to hub
-- Route tables with explicit routes
-- Test VM in workload subnet
+# Ping Dev VM (should work)
+ping 10.1.0.x
+```
 
-## Testing Connectivity
-
-### Access Test VMs via Bastion
-
-1. Go to Azure Portal → Bastion
-2. Connect to Development Test VM
-3. Username: `azureuser`
-4. Use SSH private key authentication
-
-### Run Connectivity Tests
-
-**On Development VM**:
+### Test Internet Access
 
 ```bash
-# Run pre-configured test script
-~/test-connectivity.sh
-
-# Manual tests:
-# 1. Test internet access (should work)
+# Test HTTPS (should work)
 curl -I https://www.google.com
 
-# 2. Test access to Production VM (should work on port 80)
-curl http://<prod-vm-private-ip>:80
-
-# Should see: "Production Spoke Test VM - <hostname>"
-```
-
-**On Production VM**:
-
-```bash
-# Run pre-configured test script
-~/test-connectivity.sh
-
-# Manual test:
-# Test access to Development VM (should FAIL - blocked by firewall)
-curl http://<dev-vm-private-ip>:80 --max-time 5
-
-# Should timeout (connection blocked by firewall)
+# Update packages (should work via firewall)
+sudo apt update
 ```
 
 ### Expected Results
 
-| Test        | Source  | Destination    | Expected Result         |
-| ----------- | ------- | -------------- | ----------------------- |
-| Internet    | Dev VM  | google.com:443 | ✅ SUCCESS              |
-| Internet    | Prod VM | google.com:443 | ✅ SUCCESS (restricted) |
-| Spoke→Spoke | Dev VM  | Prod VM:80     | ✅ SUCCESS              |
-| Spoke→Spoke | Prod VM | Dev VM:80      | ❌ BLOCKED              |
+| Test | Source | Destination | Expected |
+|------|--------|-------------|----------|
+| SSH | Dev VM | Prod VM | ✅ Success |
+| SSH | Prod VM | Dev VM | ✅ Success |
+| Ping | Dev VM | Prod VM | ✅ Success |
+| Internet | Dev VM | google.com | ✅ Success |
+| Internet | Prod VM | google.com | ✅ Success |
 
-## Cost Considerations
+All traffic flows through the hub firewall at 10.0.0.4 for inspection.
 
-### Monthly Cost Estimates (West Europe)
+---
 
-| Component                 | Cost/Month  | Notes                               |
-| ------------------------- | ----------- | ----------------------------------- |
-| Hub VNet                  | €0          | VNets are free                      |
-| Development VNet          | €0          | VNets are free                      |
-| Production VNet           | €0          | VNets are free                      |
-| VNet Peering (2x)         | ~€7-15      | Based on data transfer              |
-| Azure Firewall (Standard) | ~€800       | Can disable for dev (~€800 savings) |
-| Azure Bastion (Standard)  | ~€130       | Required for VM access              |
-| Application Gateway v2    | ~€200       | Mandatory component                 |
-| Test VMs (2x B2s)         | ~€60        | Can be stopped when not in use      |
-| **Total (all services)**  | **~€1,200** | Full production setup               |
-| **Dev-optimized**         | **~€400**   | Firewall disabled in dev            |
+## 💰 Cost Considerations
 
-### Cost Optimization Tips
+### Monthly Estimates (East US)
 
-1. **Development Environment**
+| Component | Cost/Month | Notes |
+|-----------|------------|-------|
+| Azure Firewall (Standard) | ~$800 | Largest cost, required for hub-spoke |
+| Application Gateway v2 | ~$200 | Layer 7 load balancer |
+| VNet Peering (2x) | ~$10 | Minimal data transfer costs |
+| VMs (2x Standard_D2s_v3) | ~$140 | Stop when not in use to save costs |
+| **Total** | **~$1,150** | Full production setup |
 
-   - Set `deploy_firewall = false` in dev.tfvars (saves ~€800/month)
-   - Stop test VMs when not in use (saves ~€30/month)
-   - Use Basic Bastion SKU instead of Standard (saves ~€20/month)
+### Cost Optimization
 
-2. **Production Environment**
+- **Stop VMs** when not in use (saves ~$140/month)
+- **Use Azure Firewall reservations** (save 40-60%)
+- **Use Basic SKU** for non-production environments
+- **Delete non-production environments** when not needed
 
-   - Use Azure Firewall reservations (save 40-60%)
-   - Monitor and optimize data transfer costs
-   - Use autoscaling for Application Gateway
+---
 
-3. **General**
-   - Delete non-production environments when not needed
-   - Use Azure Cost Management + Budgets
-   - Set up budget alerts
+## 📁 Project Structure
 
-## Naming Convention
+```
+azure-hub-spoke-networking-terraform/
+├── README.md                      # This file
+├── SECURITY-RULES.md             # Complete security reference
+│
+├── hub/                          # Hub infrastructure
+│   ├── 01-foundation.tf          # Resource group
+│   ├── 02-networking.tf          # VNet and subnets
+│   ├── 03-firewall.tf            # Azure Firewall
+│   ├── 04-app-gateway.tf         # Application Gateway
+│   ├── 05-nsg.tf                 # Network Security Groups
+│   ├── 06-route-table.tf         # Route tables
+│   └── 99-outputs.tf             # Outputs
+│
+├── spoke-development/            # Development spoke
+│   ├── 01-foundation.tf          # Resource group
+│   ├── 02-networking.tf          # VNet and subnet
+│   ├── 03-nsg.tf                 # NSG rules
+│   ├── 04-route-table.tf         # Route table
+│   ├── 05-peering.tf             # VNet peering to hub
+│   ├── 06-vm.tf                  # Test VM
+│   └── 99-outputs.tf             # Outputs
+│
+├── spoke-production/             # Production spoke
+│   └── (same structure as dev)
+│
+├── vars/                         # Configuration files
+│   ├── hub.auto.tfvars.hcl       # Hub configuration
+│   ├── dev.auto.tfvars.hcl       # Dev spoke configuration
+│   └── prod.auto.tfvars.hcl      # Prod spoke configuration
+│
+└── modules/                      # Reusable modules
+    ├── naming/                   # Naming convention
+    ├── vnet/                     # Virtual network
+    ├── subnet/                   # Subnet
+    ├── nsg/                      # Network security group
+    ├── firewall/                 # Azure Firewall
+    ├── app-gateway/              # Application Gateway
+    ├── route-table/              # Route table
+    └── vm/                       # Virtual machine
+```
 
-Following [Microsoft's recommended best practices](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-naming):
+---
 
-**Format**: `{resource-type}-{workload}-{environment}-{region}-{instance}`
+## 📚 IP Address Plan
 
-**Examples**:
+### VNet Address Spaces
 
-- `vnet-hub-prod-westeurope-001`
-- `afw-hub-prod-westeurope-001`
-- `vm-test-dev-westeurope-001`
+| VNet | CIDR | Purpose |
+|------|------|---------|
+| Hub | 10.0.0.0/16 | Central connectivity hub |
+| Development | 10.1.0.0/16 | Development environment |
+| Production | 10.2.0.0/16 | Production workloads |
 
-## References
+### Hub Subnets (10.0.0.0/16)
+
+| Subnet | CIDR | Purpose |
+|--------|------|---------|
+| AzureFirewallSubnet | 10.0.0.0/26 | Azure Firewall (required name) |
+| App Gateway | 10.0.4.0/24 | Application Gateway |
+
+### Spoke Subnets
+
+| Environment | Subnet | CIDR | Purpose |
+|-------------|--------|------|---------|
+| Development | VM Subnet | 10.1.0.0/24 | Virtual machines |
+| Production | VM Subnet | 10.2.0.0/24 | Virtual machines |
+
+---
+
+## 🔧 Common Operations
+
+### View All Outputs
+
+```bash
+# All modules
+terragrunt run-all output
+
+# Specific module
+cd hub
+terragrunt output
+```
+
+### Update Security Rules
+
+1. Edit `vars/hub.auto.tfvars.hcl` (firewall rules)
+2. Edit `vars/dev.auto.tfvars.hcl` or `vars/prod.auto.tfvars.hcl` (NSG rules)
+3. Apply changes:
+```bash
+cd hub  # or spoke-development / spoke-production
+terragrunt apply
+```
+
+### Add New Spoke
+
+1. Copy `spoke-development/` directory
+2. Update `environment` variable
+3. Update address space in `locals.tf`
+4. Add to Terragrunt dependency chain
+5. Run `terragrunt apply`
+
+---
+
+## 📖 References
 
 ### Microsoft Documentation
 
 - [Hub-Spoke Network Topology](https://learn.microsoft.com/en-us/azure/architecture/reference-architectures/hybrid-networking/hub-spoke)
 - [Azure Firewall](https://learn.microsoft.com/en-us/azure/firewall/)
-- [Azure Bastion](https://learn.microsoft.com/en-us/azure/bastion/)
 - [Application Gateway](https://learn.microsoft.com/en-us/azure/application-gateway/)
 - [Azure Naming Conventions](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-naming)
 
 ### Terraform Documentation
 
 - [Azure Provider](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs)
-- [azurerm_virtual_network](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/virtual_network)
-- [azurerm_firewall](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/firewall)
+- [Terragrunt](https://terragrunt.gruntwork.io/)
+
+### Security Reference
+
+- **📋 [Complete Security Rules →](./SECURITY-RULES.md)** - All firewall rules, NSG rules, route tables
 
 ---
 
-**Last Updated**: 2025-12-25
-**Version**: 2.0.0
-**Terraform Version**: >= 1.0
-**Azure Provider Version**: ~> 3.0
-
-**License**: MIT
+**Last Updated:** 2025-01-12
+**Terraform Version:** >= 1.0
+**Terragrunt Version:** >= 0.48
+**Azure Provider:** ~> 3.0
+**License:** MIT
