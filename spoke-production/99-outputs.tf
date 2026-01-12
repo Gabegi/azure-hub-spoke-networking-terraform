@@ -1,4 +1,4 @@
-# spoke-production/99-outputs.tf
+# spoke-prd/99-outputs.tf
 # Outputs from Production Spoke configuration
 
 # ============================================================================
