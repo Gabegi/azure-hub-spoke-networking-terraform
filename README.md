@@ -164,6 +164,37 @@ terragrunt run-all apply
 
 ## 🧪 Testing Connectivity
 
+### Test Using Azure CLI (Recommended)
+
+Run commands directly on VMs without SSH access using Azure CLI:
+
+**Ping from Dev VM to Prod VM:**
+```bash
+az vm run-command invoke \
+  --resource-group rg-spoke-dev-eastus-001 \
+  --name vm-app-dev-eastus-001 \
+  --command-id RunShellScript \
+  --scripts "ping -c 3 10.2.0.4"
+```
+
+**Ping from Prod VM to Dev VM:**
+```bash
+az vm run-command invoke \
+  --resource-group rg-spoke-production-eastus-001 \
+  --name vm-app-production-eastus-001 \
+  --command-id RunShellScript \
+  --scripts "ping -c 3 10.1.0.4"
+```
+
+**Test Internet Access:**
+```bash
+az vm run-command invoke \
+  --resource-group rg-spoke-dev-eastus-001 \
+  --name vm-app-dev-eastus-001 \
+  --command-id RunShellScript \
+  --scripts "curl -I https://www.google.com"
+```
+
 ### Access VMs via Azure Portal
 
 1. Navigate to Azure Portal → Virtual Machines
@@ -175,29 +206,19 @@ terragrunt run-all apply
 **From Dev VM:**
 ```bash
 # SSH to Prod VM (should work)
-ssh azureuser@10.2.0.x
+ssh azureuser@10.2.0.4
 
 # Ping Prod VM (should work)
-ping 10.2.0.x
+ping 10.2.0.4
 ```
 
 **From Prod VM:**
 ```bash
 # SSH to Dev VM (should work)
-ssh azureuser@10.1.0.x
+ssh azureuser@10.1.0.4
 
 # Ping Dev VM (should work)
-ping 10.1.0.x
-```
-
-### Test Internet Access
-
-```bash
-# Test HTTPS (should work)
-curl -I https://www.google.com
-
-# Update packages (should work via firewall)
-sudo apt update
+ping 10.1.0.4
 ```
 
 ### Expected Results
@@ -207,10 +228,11 @@ sudo apt update
 | SSH | Dev VM | Prod VM | ✅ Success |
 | SSH | Prod VM | Dev VM | ✅ Success |
 | Ping | Dev VM | Prod VM | ✅ Success |
+| Ping | Prod VM | Dev VM | ✅ Success |
 | Internet | Dev VM | google.com | ✅ Success |
 | Internet | Prod VM | google.com | ✅ Success |
 
-All traffic flows through the hub firewall at 10.0.0.4 for inspection.
+All traffic flows through the hub firewall at 10.0.0.4 for inspection (TTL decrements by 1).
 
 ---
 
